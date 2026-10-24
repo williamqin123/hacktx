@@ -147,3 +147,52 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+#
+
+# Flask specific
+instance/
+.webassets-cache
+
+# Environments & Secrets (DO NOT COMMIT SECRETS)
+.env
+.flaskenv
+venv/
+.venv/
+env/
+ENV/
+
+# Python bytecode / compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / Packaging
+build/
+dist/
+eggs/
+*.egg-info/
+wheels/
+
+# Testing and Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Database (if using local SQLite for development)
+*.sqlite3
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# OS generated files
+.DS_Store
+Thumbs.db
