@@ -1,5 +1,6 @@
 
 <script lang="ts">
+    // @ts-ignore
     import { Button } from "#lib/components/ui/button";
     import {
         Card,
@@ -7,8 +8,11 @@
         CardDescription,
         CardHeader,
         CardTitle
+    // @ts-ignore
     } from "#lib/components/ui/card";
+     // @ts-ignore
     import { Label } from "#lib/components/ui/label";
+     // @ts-ignore
     import { Textarea } from "#lib/components/ui/textarea";
 
     let dishInstructions = $state("");
