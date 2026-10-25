@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { apiFetch } from '#utils/api.js';
+	import { apiFetch, PUBLIC_API_URL } from '#utils/api.js';
 	import { Button } from '#lib/components/ui/button';
 	import { ShoppingCart, Trash2 } from '@lucide/svelte';
 
@@ -131,7 +131,7 @@
 			return;
 		}
 		if (!isKrogerConnected) {
-			window.location.assign('http://localhost:5001/api/kroger/connect?checkout=1');
+			window.location.assign(PUBLIC_API_URL + '/api/kroger/connect?checkout=1');
 			return;
 		}
 

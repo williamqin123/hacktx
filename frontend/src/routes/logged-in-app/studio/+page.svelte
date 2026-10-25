@@ -174,7 +174,7 @@
         try {
             const profile = JSON.parse(pendingProfile);
             const response = await apiFetch(
-                "http://localhost:5001/set-profile-info",
+                "set-profile-info",
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },

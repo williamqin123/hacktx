@@ -89,7 +89,7 @@
 		deletingPlanId = id;
 		try {
 			const response = await apiFetch(
-				`http://localhost:5001/api/meal-plans/${encodeURIComponent(id)}`,
+				`api/meal-plans/${encodeURIComponent(id)}`,
 				{ method: 'DELETE' }
 			);
 			const result = await response.json();

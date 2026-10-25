@@ -165,7 +165,7 @@
 		busyMealId = id;
 		try {
 			const response = await apiFetch(
-				`http://localhost:5001/api/saved-meals/${encodeURIComponent(id)}`,
+				`api/saved-meals/${encodeURIComponent(id)}`,
 				{ method: 'DELETE' }
 			);
 			const result = await response.json();

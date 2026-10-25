@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
-	import { apiFetch } from '#utils/api.js';
+	import { apiFetch, PUBLIC_API_URL } from '#utils/api.js';
 	import { Button } from '#lib/components/ui/button';
 	import { Card } from '#lib/components/ui/card';
 	import { Bookmark, BookmarkCheck, Clock3, Flame, ShoppingCart, Users } from '@lucide/svelte';
@@ -150,8 +150,8 @@
 		try {
 			const response = await apiFetch(
 				savedId
-					? `http://localhost:5001/api/saved-meals/${encodeURIComponent(savedId)}`
-					: 'http://localhost:5001/api/saved-meals',
+					? `${PUBLIC_API_URL}/api/saved-meals/${encodeURIComponent(savedId)}`
+					: `${PUBLIC_API_URL}/api/saved-meals`,
 				savedId
 					? { method: 'DELETE' }
 					: {
