@@ -72,10 +72,13 @@
 		bottom: 0;
 		left: 0;
 		padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
-		background: rgba(255, 255, 255, 0.88);
+
+		/* Always use dark theme */
+		background: rgba(28, 28, 30, 0.96);
 		backdrop-filter: blur(24px);
 		-webkit-backdrop-filter: blur(24px);
-		border-top: 1px solid rgba(128, 128, 128, 0.18);
+		border-top: 1px solid rgba(255, 255, 255, 0.12);
+		color-scheme: dark;
 	}
 
 	.nav-tabs {
@@ -94,7 +97,7 @@
 		align-items: center;
 		justify-content: center;
 		gap: 4px;
-		color: #8e8e93;
+		color: #98989f;
 		text-decoration: none;
 		font-size: 10px;
 		font-weight: 500;
@@ -110,28 +113,13 @@
 	}
 
 	.nav-tab.active {
-		color: #007aff;
+		color: #0a84ff;
 		font-weight: 600;
 	}
 
 	.nav-tab:focus-visible {
-		outline: 2px solid #007aff;
+		outline: 2px solid #0a84ff;
 		outline-offset: -2px;
 		border-radius: 10px;
-	}
-
-	@media (prefers-color-scheme: dark) {
-		.navbar {
-			background: rgba(28, 28, 30, 0.88);
-			border-top-color: rgba(255, 255, 255, 0.12);
-		}
-
-		.nav-tab {
-			color: #98989f;
-		}
-
-		.nav-tab.active {
-			color: #0a84ff;
-		}
 	}
 </style>
