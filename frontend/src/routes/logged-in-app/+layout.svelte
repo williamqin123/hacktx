@@ -1,21 +1,21 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import {
-		House,
+		Sparkles,
 		LayoutDashboard,
 		BookOpen,
-		Heart,
+		User,
 		Settings
 	} from '@lucide/svelte';
 
 	let { children } = $props();
 
 	const tabs = [
-		{ label: 'Home', href: '/', icon: House },
-		{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-		{ label: 'Recipes', href: '/recipes', icon: BookOpen },
-		{ label: 'Favorites', href: '/favorites', icon: Heart },
-		{ label: 'Settings', href: '/settings', icon: Settings }
+		{ label: 'Profile', href: '/logged-in-app/profile', icon: User },
+		{ label: 'Recipes', href: '/logged-in-app/my-recipes', icon: BookOpen },
+		{ label: 'Studio', href: '/logged-in-app/generate-recipe', icon: Sparkles },
+		{ label: 'Orders', href: '/logged-in-app/orders/', icon: LayoutDashboard },
+		{ label: 'Settings', href: '/logged-in-app/settings', icon: Settings }
 	];
 </script>
 
