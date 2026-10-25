@@ -34,6 +34,7 @@
 		title: string;
 		price: number | null;
 		url?: string;
+		upc?: string;
 		brand?: string;
 		size?: string;
 		retailer: 'Walmart' | 'Kroger';
@@ -47,6 +48,7 @@
 		quantity: number;
 		price: number | null;
 		product_page_url?: string;
+		upc?: string;
 		retailer?: 'Walmart' | 'Kroger';
 	};
 
@@ -248,6 +250,7 @@
 				title: product.description ?? groceryItem.item,
 				price: product.price,
 				url: product.product_url,
+				upc: product.upc,
 				brand: product.brand,
 				size: product.size,
 				retailer: 'Kroger' as const
@@ -346,6 +349,7 @@
 				quantity: 1,
 				price,
 				product_page_url: productUrl,
+				upc: product.upc,
 				retailer: selectedRetailer
 			} satisfies CartItem];
 		});

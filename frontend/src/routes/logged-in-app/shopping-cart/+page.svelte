@@ -12,6 +12,7 @@
 		quantity: number;
 		price: number | null;
 		product_page_url?: string;
+		upc?: string;
 		retailer?: 'Walmart' | 'Kroger';
 	};
 
@@ -20,9 +21,27 @@
 	let errorMessage = $state('');
 	let actionMessage = $state('');
 	let isSaving = $state(false);
+	let isCheckingOut = $state(false);
+	let isKrogerConnected = $state(false);
 
 	onMount(() => {
 		void loadCart();
+		void loadKrogerConnection();
+		const krogerStatus = new URLSearchParams(window.location.search).get('kroger');
+		if (krogerStatus === 'checkout_error') {
+			errorMessage = 'Kroger could not complete checkout. Please try again.';
+		} else if (krogerStatus === 'connected') {
+			actionMessage = 'Your Kroger account is connected.';
+			isKrogerConnected = true;
+		} else if (krogerStatus === 'connect_error') {
+			errorMessage = 'Kroger account authorization was not completed.';
+		} else if (krogerStatus === 'state_error') {
+			errorMessage = 'Kroger authorization expired or could not be matched. Start the connection again.';
+		} else if (krogerStatus === 'authorization_denied') {
+			errorMessage = 'Kroger authorization was declined. Approve access and try again.';
+		} else if (krogerStatus === 'authorization_error') {
+			errorMessage = 'Kroger did not return an authorization code. Start the connection again.';
+		}
 	});
 
 	async function loadCart() {
@@ -42,6 +61,21 @@
 			errorMessage = error instanceof Error ? error.message : 'Could not load your shopping cart.';
 		} finally {
 			isLoading = false;
+		}
+	}
+
+	async function loadKrogerConnection() {
+		try {
+			const response = await apiFetch('http://localhost:5001/api/kroger/connection');
+			const result = await response.json();
+			if (!response.ok) {
+				throw new Error(result.error ?? 'Could not check your Kroger connection.');
+			}
+			isKrogerConnected = result.connected === true;
+		} catch (error) {
+			errorMessage = error instanceof Error
+				? error.message
+				: 'Could not check your Kroger connection.';
 		}
 	}
 
@@ -82,6 +116,47 @@
 		void saveItems(items.filter((item) => item.id !== id));
 	}
 
+	function hasKrogerProduct(item: CartItem) {
+		if (item.retailer === 'Kroger') {
+			return Boolean(item.upc || item.product_page_url?.match(/\/p\/a\/\d+/));
+		}
+		return Boolean(item.product_page_url?.match(/^https:\/\/www\.kroger\.com\/p\/a\/\d+/));
+	}
+
+	async function checkoutWithKroger() {
+		errorMessage = '';
+		actionMessage = '';
+		if (krogerItemCount === 0) {
+			errorMessage = 'Your app cart does not contain any Kroger products with UPCs.';
+			return;
+		}
+		if (!isKrogerConnected) {
+			window.location.assign('http://localhost:5001/api/kroger/connect?checkout=1');
+			return;
+		}
+
+		isCheckingOut = true;
+		try {
+			const response = await apiFetch('http://localhost:5001/api/kroger/cart', {
+				method: 'POST'
+			});
+			const result = await response.json();
+			if (!response.ok) {
+				throw new Error(result.error ?? 'Could not add products to your Kroger cart.');
+			}
+			window.location.assign('https://www.kroger.com/cart');
+		} catch (error) {
+			errorMessage = error instanceof Error
+				? error.message
+				: 'Could not add products to your Kroger cart.';
+			isCheckingOut = false;
+		}
+	}
+
+	const krogerItemCount = $derived(items.filter(hasKrogerProduct).length);
+	const otherRetailerItemCount = $derived(
+		items.filter((item) => item.retailer !== 'Kroger').length
+	);
 	const total = $derived(
 		items.reduce((sum, item) => sum + (item.price ?? 0) * item.quantity, 0)
 	);
@@ -190,9 +265,30 @@
 			</div>
 			<footer class="mt-5 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
 				<p class="text-lg font-semibold">Total: ${total.toFixed(2)}</p>
-				<Button disabled={isSaving} onclick={() => actionMessage = 'Checkout is a demo and is not connected to a payment service.'}>
-					Fake checkout
-				</Button>
+				<div class="flex flex-col items-end gap-2">
+					{#if krogerItemCount === 0}
+						<p class="max-w-sm text-right text-xs text-muted-foreground">
+							Choose Kroger products from a meal plan to enable Kroger checkout.
+						</p>
+					{/if}
+					{#if otherRetailerItemCount > 0}
+						<p class="max-w-sm text-right text-xs text-muted-foreground">
+							Only Kroger products will be added. Other retailer items stay in this app cart.
+						</p>
+					{/if}
+					<Button
+						disabled={isSaving || isCheckingOut || krogerItemCount === 0}
+						onclick={checkoutWithKroger}
+					>
+						{#if isCheckingOut}
+							Adding to Kroger...
+						{:else if isKrogerConnected}
+							Checkout at Kroger
+						{:else}
+							Connect Kroger & Checkout
+						{/if}
+					</Button>
+				</div>
 			</footer>
 		</section>
 	{/if}

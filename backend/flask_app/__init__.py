@@ -45,5 +45,8 @@ def create_app():
 
     from flask_app.kroger import kroger_bp
     app.register_blueprint(kroger_bp)
+
+    from flask_app.kroger_cart import kroger_cart_bp
+    app.register_blueprint(kroger_cart_bp)
     
     return app
