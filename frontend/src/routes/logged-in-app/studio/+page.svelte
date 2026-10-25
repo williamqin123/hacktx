@@ -65,7 +65,7 @@
 
         try {
             const response = await apiFetch(
-                "http://localhost:5001/api/meal-plan",
+                "api/meal-plan",
                 {
                     method: "POST",
                     headers: {
@@ -101,7 +101,7 @@
             }
 
             const shoppingResponse = await apiFetch(
-                "http://localhost:5001/api/walmart-search",
+                "api/walmart-search",
                 {
                     method: "POST",
                     headers: {
@@ -146,7 +146,7 @@
 
         try {
             const response = await apiFetch(
-                "http://localhost:5001/get-profile-info"
+                "get-profile-info"
             );
 
             if (response.status === 404) {
