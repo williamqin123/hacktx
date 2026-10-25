@@ -12,8 +12,8 @@
 
 	const tabs = [
 		{ label: 'Profile', href: '/logged-in-app/profile', icon: User },
-		{ label: 'Studio', href: '/logged-in-app/generate-recipe', icon: Sparkles },
-		{ label: 'Recipes', href: '/logged-in-app/my-recipes', icon: BookOpen },
+		{ label: 'Studio', href: '/logged-in-app/studio', icon: Sparkles },
+		{ label: 'Meal Plans', href: '/logged-in-app/meal-plans', icon: BookOpen },
 		//{ label: 'Orders', href: '/logged-in-app/orders/', icon: LayoutDashboard },
 		//{ label: 'Settings', href: '/logged-in-app/settings', icon: Settings }
 	];

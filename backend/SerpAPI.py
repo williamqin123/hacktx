@@ -4,8 +4,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-client = serpapi.Client(api_key= os.getenv("SERPAPI_KEY"))
-
 
 AGENT_INSTRUCTIONS = """
 You are MealMind, an intelligent meal-planning and grocery-shopping agent.
@@ -33,13 +31,15 @@ Always return valid JSON.
 Do not include markdown.
 Do not include explanations outside the JSON.
 """
-people = 4
-budget = 100
-diet = """keto"""
-days = 5
-dislikes = """tomato"""
 
-prompt = f"""
+
+def generate_meal_plan(people, budget, diet, days, dislikes):
+    api_key = os.getenv("SERPAPI_KEY")
+    if not api_key:
+        raise RuntimeError("SERPAPI_KEY is not set")
+
+    client = serpapi.Client(api_key=api_key)
+    prompt = f"""
 {AGENT_INSTRUCTIONS}
 
 USER REQUEST:
@@ -52,9 +52,10 @@ Dislikes: {dislikes}
 Create the meal plan.
 """
 
-results = client.search({
-  "engine": "google_gemini",
-  "q": prompt
-})
-
-print(results)
+    results = client.search({
+        "engine": "google_gemini",
+        "q": prompt,
+    })
+    if hasattr(results, "as_dict"):
+        return results.as_dict()
+    return results
