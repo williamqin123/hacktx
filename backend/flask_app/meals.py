@@ -3,11 +3,14 @@ import math
 
 from flask import Blueprint, jsonify, request
 
+from .auth import login_required
+
 
 walmart_bp = Blueprint("walmart", __name__)
 
 
 @walmart_bp.route("/api/meal-plan", methods=["POST"])
+@login_required
 def create_meal_plan():
     if not request.is_json:
         return jsonify({"error": "Request body must be JSON"}), 400
@@ -79,10 +82,28 @@ def create_meal_plan():
             "details": str(error),
         }), 502
 
+    from WalmartAPI import search_walmart_items
+
+    try:
+        walmart_data = search_walmart_items(meal_plan)
+    except (ValueError, RuntimeError) as error:
+        logging.exception("Failed to find Walmart products for generated meal plan")
+        return jsonify({
+            "error": "Could not find Walmart products for the generated meal plan",
+            "details": str(error),
+        }), 502
+    except Exception:
+        logging.exception("Walmart product search failed")
+        return jsonify({"error": "Walmart product search failed"}), 502
+
     from .recipe_catalog import store_recipes
 
     try:
-        saved_recipes = store_recipes(meal_plan)
+        saved_meal_plan = store_recipes(
+            meal_plan,
+            user_id=request.current_user["sub"],
+            walmart_results=walmart_data["walmart_results"],
+        )
     except ValueError as error:
         return jsonify({
             "error": "Generated meal plan could not be saved as recipes",
@@ -92,7 +113,11 @@ def create_meal_plan():
         logging.exception("Failed to save generated recipes")
         return jsonify({"error": "Failed to save generated recipes"}), 500
 
-    return jsonify({**meal_plan, "recipes": saved_recipes}), 200
+    return jsonify({
+        **meal_plan,
+        "saved_meal_plan": saved_meal_plan,
+        "walmart_results": walmart_data["walmart_results"],
+    }), 200
 
 
 

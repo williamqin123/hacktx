@@ -14,13 +14,10 @@
     import { Label } from "#lib/components/ui/label";
     // @ts-ignore
     import { Textarea } from "#lib/components/ui/textarea";
-    import * as Collapsible from "#lib/components/ui/collapsible";
     import { Separator } from "#lib/components/ui/separator";
-    import { ChevronDown } from "@lucide/svelte";
 
     import { apiFetch } from "#utils/api.js";
     import { onMount } from "svelte";
-    import DietaryGoalPicker from "#components/DietaryGoalPicker.svelte";
 
     // Main request
     let description = $state("");
@@ -34,11 +31,12 @@
     let activityLevel = $state("sedentary");
     let dietaryRestrictions = $state<string[]>([]);
 
-    // Overrides
+    // Saved profile defaults
     let dietGoal = $state("maintain");
     let exclusions = $state("");
 
-    let isLoadingUserSavedDietaryPreferences = $state(true);
+    let isLoadingProfile = $state(true);
+    let isOnboardingProfilePending = $state(false);
     let isSubmitting = $state(false);
     let errorMessage = $state("");
 
@@ -100,35 +98,20 @@
                 throw new Error("Meal plan did not include a grocery list.");
             }
 
-            const shoppingResponse = await apiFetch(
-                "api/walmart-search",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ items: responseData.grocery_list })
-                }
-            );
-            const walmartResults = await shoppingResponse.json();
-            if (!shoppingResponse.ok) {
-                throw new Error(
-                    walmartResults.details ??
-                        walmartResults.error ??
-                        "Failed to look up grocery products."
-                );
+            const slug = responseData.saved_meal_plan?.id;
+            if (typeof slug !== "string" || !slug) {
+                throw new Error("Meal plan was generated but not saved.");
             }
 
-            const slug = crypto.randomUUID();
             sessionStorage.setItem(
                 `meal-plan-shopping:${slug}`,
                 JSON.stringify({
                     mealPlan: responseData,
-                    walmartResults
+                    walmartResults: responseData.walmart_results ?? {}
                 })
             );
             window.location.assign(
-                `/logged-in-app/meal-plans-shopping/${slug}`
+                `/logged-in-app/meal-plan-recipes/${slug}`
             );
         } catch (error) {
             errorMessage =
@@ -141,7 +124,7 @@
     }
 
     async function loadProfile() {
-        isLoadingUserSavedDietaryPreferences = true;
+        isLoadingProfile = true;
         errorMessage = "";
 
         try {
@@ -174,12 +157,57 @@
                     ? error.message
                     : "Failed to load profile.";
         } finally {
-            isLoadingUserSavedDietaryPreferences = false;
+            isLoadingProfile = false;
+        }
+    }
+
+    async function initializeProfile() {
+        const pendingProfile = sessionStorage.getItem("pending-onboarding-profile");
+        if (!pendingProfile) {
+            await loadProfile();
+            return;
+        }
+
+        isOnboardingProfilePending = true;
+        isLoadingProfile = true;
+        errorMessage = "";
+        try {
+            const profile = JSON.parse(pendingProfile);
+            const response = await apiFetch(
+                "http://localhost:5001/set-profile-info",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: pendingProfile
+                }
+            );
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.error ?? "Failed to save your onboarding profile.");
+            }
+
+            age = profile.age ?? undefined;
+            sex = profile.sex ?? "";
+            height = profile.height ?? undefined;
+            weight = profile.weight ?? undefined;
+            activityLevel = profile.activityLevel ?? "sedentary";
+            dietaryRestrictions = profile.dietaryRestrictions ?? [];
+            dietGoal = profile.goal ?? "maintain";
+            exclusions = profile.dislikes ?? "";
+            sessionStorage.removeItem("pending-onboarding-profile");
+            isOnboardingProfilePending = false;
+        } catch (error) {
+            errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : "Could not save your onboarding profile.";
+        } finally {
+            isLoadingProfile = false;
         }
     }
 
     onMount(() => {
-        loadProfile();
+        void initializeProfile();
     });
 </script>
 
@@ -271,57 +299,26 @@
 
                 <Separator />
 
-                <Collapsible.Root class="space-y-4">
-                    <Collapsible.Trigger
-                        class="flex w-full items-center justify-between rounded-md py-2 text-sm font-medium hover:underline"
-                    >
-                        Override Your Saved Dietary Preferences
-                        <ChevronDown
-                            class="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180"
-                        />
-                    </Collapsible.Trigger>
-
-                    <Collapsible.Content class="space-y-4">
-                        {#if isLoadingUserSavedDietaryPreferences}
-                            <p class="text-sm text-muted-foreground">
-                                Loading your saved dietary preferences...
-                            </p>
-                        {:else}
-                            <section class="space-y-4">
-                                <h2 class="text-lg font-semibold">
-                                    Dislikes / Exclusions
-                                </h2>
-
-                                <div class="space-y-2">
-                                    <Label for="exclude">
-                                        Dislikes / Exclusions
-                                    </Label>
-                                    <Textarea
-                                        id="exclude"
-                                        bind:value={exclusions}
-                                        placeholder="e.g. No ranch sauce, mushrooms, or olives"
-                                        rows={3}
-                                    />
-                                </div>
-
-                                <Separator />
-
-                                <DietaryGoalPicker bind:dietGoal={dietGoal} />
-                            </section>
-                        {/if}
-                    </Collapsible.Content>
-                </Collapsible.Root>
-
                 {#if errorMessage}
                     <p class="text-sm text-destructive" role="alert">
                         {errorMessage}
                     </p>
+                    {#if isOnboardingProfilePending}
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onclick={initializeProfile}
+                            disabled={isLoadingProfile}
+                        >
+                            Retry profile save
+                        </Button>
+                    {/if}
                 {/if}
 
                 <Button
                     type="submit"
                     class="w-full"
-                    disabled={isSubmitting || isLoadingUserSavedDietaryPreferences}
+                    disabled={isSubmitting || isLoadingProfile || isOnboardingProfilePending}
                 >
                     {isSubmitting ? "Generating..." : "Generate Meal Plan"}
                 </Button>

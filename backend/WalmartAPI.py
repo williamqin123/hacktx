@@ -105,6 +105,11 @@ def _parse_items(value):
         return _parse_items(parsed)
 
     if isinstance(value, list):
+        try:
+            return _normalize_items(value)
+        except ValueError:
+            pass
+
         for entry in value:
             try:
                 return _parse_items(entry)
@@ -115,6 +120,11 @@ def _parse_items(value):
 
 
 def search_walmart_items(meal_plan_response):
+    if isinstance(meal_plan_response, list):
+        meal_plan_response = {"grocery_list": meal_plan_response}
+    if not isinstance(meal_plan_response, dict):
+        raise ValueError("Gemini response must be a JSON object or grocery item list")
+
     items = _parse_items(meal_plan_response)
     unique_items = {}
     for entry in items:
@@ -156,9 +166,6 @@ def search_walmart_items(meal_plan_response):
                 "organic_results": [],
             }
         results_by_item[display_name] = result
-
-    if not isinstance(meal_plan_response, dict):
-        raise ValueError("Gemini response must be a JSON object")
 
     combined_results = {
         "meal_plan": meal_plan_response.get("meal_plan"),

@@ -10,6 +10,7 @@
 	import { apiFetch } from '#utils/api.js';
 
 	let name = $state('');
+	let zipCode = $state('');
 	let age = $state<number | undefined>(undefined);
 	let sex = $state('');
 	let height = $state<number | undefined>(undefined);
@@ -34,6 +35,7 @@
 		try {
 			const profile = {
 				name: name.trim(),
+				zipCode: zipCode.trim(),
 				age,
 				sex,
 				height,
@@ -56,7 +58,8 @@
 			);
 
 			if (!response.ok) {
-				throw new Error('Failed to save profile.');
+				const result = await response.json();
+				throw new Error(result.error ?? 'Failed to save profile.');
 			}
 
 			successMessage = 'Profile saved successfully.';
@@ -90,6 +93,7 @@
 			const profile = await response.json();
 
 			name = profile.name ?? '';
+			zipCode = profile.zipCode ?? '';
 			age = profile.age ?? undefined;
 			sex = profile.sex ?? '';
 			height = profile.height ?? undefined;
@@ -163,6 +167,20 @@
 					/>
 				</div>
 
+				<div class="space-y-2">
+					<Label for="zipCode">ZIP code</Label>
+					<Input
+						id="zipCode"
+						bind:value={zipCode}
+						placeholder="e.g. 78753"
+						autocomplete="postal-code"
+						maxlength={10}
+					/>
+					<p class="text-sm text-muted-foreground">
+						Used to find your nearest Kroger store and check pickup availability.
+					</p>
+				</div>
+
 				<div class="grid grid-cols-2 gap-4">
 					<div class="space-y-2">
 						<Label for="age">Age</Label>
@@ -228,16 +246,16 @@
 						<option value="sedentary">
 							Sedentary — little or no exercise
 						</option>
-						<option value="light">
+						<option value="lightly_active">
 							Lightly active — exercise 1–3 days/week
 						</option>
-						<option value="moderate">
+						<option value="moderately_active">
 							Moderately active — exercise 3–5 days/week
 						</option>
-						<option value="active">
+						<option value="very_active">
 							Very active — exercise 6–7 days/week
 						</option>
-						<option value="very_active">
+						<option value="extra_active">
 							Extremely active — intense exercise or physical job
 						</option>
 					</select>

@@ -42,5 +42,8 @@ def create_app():
 
     from flask_app.recipe_catalog import recipe_bp
     app.register_blueprint(recipe_bp)
+
+    from flask_app.kroger import kroger_bp
+    app.register_blueprint(kroger_bp)
     
     return app
