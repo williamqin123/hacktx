@@ -18,6 +18,7 @@
 
     import { apiFetch } from "#utils/api.js";
     import { onMount } from "svelte";
+    import { LoaderCircle, Sparkles } from "@lucide/svelte";
 
     // Main request
     let description = $state("");
@@ -212,7 +213,7 @@
 </script>
 
 <svelte:head>
-    <title>Ask the Chef</title>
+    <title>Prandium AI — Ask the Chef</title>
     <meta
         name="description"
         content="Create a personalized meal plan based on your preferences and serving size."
@@ -222,16 +223,18 @@
 <main class="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-10">
     <Card class="w-full max-w-2xl shadow-lg">
         <CardHeader class="space-y-2 text-center">
-            <CardTitle class="text-3xl font-bold">
-                Ask the Chef
-            </CardTitle>
+            <div class="mb-2 flex items-center justify-center gap-2 text-primary">
+                <Sparkles class="size-5" />
+                <span class="text-sm font-semibold tracking-wide">Prandium AI</span>
+            </div>
+            <CardTitle class="text-3xl font-bold">Ask the Chef</CardTitle>
             <CardDescription class="text-sm">
                 Tell us what you want to eat, and we'll help you create a meal plan.
             </CardDescription>
         </CardHeader>
 
         <CardContent>
-            <form onsubmit={submit} class="space-y-8">
+            <form onsubmit={submit} class="space-y-8" aria-busy={isSubmitting}>
                 <section class="space-y-4">
                     <div class="space-y-1">
                         <h2 class="text-lg font-semibold">
@@ -320,9 +323,126 @@
                     class="w-full"
                     disabled={isSubmitting || isLoadingProfile || isOnboardingProfilePending}
                 >
-                    {isSubmitting ? "Generating..." : "Generate Meal Plan"}
+                    {#if isSubmitting}
+                        <LoaderCircle class="mr-2 size-4 animate-spin" aria-hidden="true" />
+                        Creating your meal plan...
+                    {:else}
+                        <Sparkles class="mr-2 size-4" aria-hidden="true" />
+                        Generate Meal Plan
+                    {/if}
                 </Button>
+                {#if isSubmitting}
+                    <section
+                        class="generation-status"
+                        role="status"
+                        aria-live="polite"
+                        aria-label="Creating your personalized meal plan"
+                    >
+                        <div class="generation-status__glow" aria-hidden="true"></div>
+                        <div class="generation-status__icon" aria-hidden="true">
+                            <LoaderCircle class="size-6 animate-spin" />
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="font-semibold">Creating your personalized meal plan</p>
+                            <p class="mt-1 text-sm text-muted-foreground">
+                                Prandium AI is shaping recipes and organizing your shopping list.
+                            </p>
+                            <div class="generation-status__track mt-4" aria-hidden="true">
+                                <span></span>
+                            </div>
+                        </div>
+                    </section>
+                {/if}
             </form>
         </CardContent>
     </Card>
 </main>
+
+<style>
+    .generation-status {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        overflow: hidden;
+        border: 1px solid color-mix(in oklab, var(--primary) 24%, var(--border));
+        border-radius: 1rem;
+        padding: 1.1rem;
+        background: color-mix(in oklab, var(--primary) 5%, var(--card));
+        animation: generation-enter 240ms ease-out both;
+    }
+
+    .generation-status__glow {
+        position: absolute;
+        top: -4rem;
+        right: -2rem;
+        width: 10rem;
+        height: 10rem;
+        border-radius: 9999px;
+        background: color-mix(in oklab, var(--primary) 12%, transparent);
+        filter: blur(32px);
+        pointer-events: none;
+    }
+
+    .generation-status__icon {
+        z-index: 1;
+        display: grid;
+        width: 2.75rem;
+        height: 2.75rem;
+        flex: 0 0 auto;
+        place-items: center;
+        border-radius: 0.85rem;
+        background: var(--primary);
+        color: var(--primary-foreground);
+    }
+
+    .generation-status__track {
+        height: 0.25rem;
+        overflow: hidden;
+        border-radius: 9999px;
+        background: color-mix(in oklab, var(--primary) 14%, var(--background));
+    }
+
+    .generation-status__track span {
+        display: block;
+        width: 38%;
+        height: 100%;
+        border-radius: inherit;
+        background: var(--primary);
+        animation: generation-progress 1.5s ease-in-out infinite;
+    }
+
+    @keyframes generation-enter {
+        from {
+            opacity: 0;
+            transform: translateY(6px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes generation-progress {
+        0% {
+            transform: translateX(-110%);
+        }
+        55% {
+            transform: translateX(170%);
+        }
+        100% {
+            transform: translateX(300%);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .generation-status {
+            animation: none;
+        }
+
+        .generation-status__track span {
+            animation: none;
+            width: 100%;
+        }
+    }
+</style>

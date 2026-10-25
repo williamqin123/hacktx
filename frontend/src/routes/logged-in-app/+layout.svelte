@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { fade } from 'svelte/transition';
 	import {
 		Sparkles,
 		LayoutDashboard,
@@ -24,9 +25,11 @@
 </script>
 
 <div class="app-layout">
-	<main class="content-container">
-		{@render children()}
-	</main>
+	{#key page.url.pathname}
+		<div class="content-container" transition:fade={{ duration: 160 }}>
+			{@render children()}
+		</div>
+	{/key}
 
 	<footer class="navbar">
 		<nav class="nav-tabs" aria-label="Main navigation">
@@ -102,7 +105,17 @@
 		font-size: 10px;
 		font-weight: 500;
 		-webkit-tap-highlight-color: transparent;
-		transition: color 150ms ease;
+		transition:
+			color 180ms ease,
+			transform 180ms ease;
+	}
+
+	.nav-tab:hover {
+		transform: translateY(-2px);
+	}
+
+	.nav-tab:active {
+		transform: scale(0.96);
 	}
 
 	.nav-tab span {
@@ -117,9 +130,37 @@
 		font-weight: 600;
 	}
 
+	.nav-tab.active :global(svg) {
+		animation: nav-icon-enter 220ms ease-out both;
+	}
+
 	.nav-tab:focus-visible {
 		outline: 2px solid #0a84ff;
 		outline-offset: -2px;
 		border-radius: 10px;
+	}
+
+	@keyframes nav-icon-enter {
+		from {
+			opacity: 0.65;
+			transform: translateY(3px) scale(0.9);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0) scale(1);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.nav-tab,
+		.nav-tab.active :global(svg) {
+			animation: none;
+			transition: none;
+		}
+
+		.nav-tab:hover,
+		.nav-tab:active {
+			transform: none;
+		}
 	}
 </style>
