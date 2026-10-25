@@ -144,8 +144,9 @@ def callback():
         "auth_token",
         id_token,
         httponly=True,
-        secure=not current_app.debug,
-        samesite="Lax",
+        #secure=not current_app.debug,
+        samesite="None",
+        secure=True,
         path="/",
     )
     return response
