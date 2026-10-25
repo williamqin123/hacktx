@@ -19,6 +19,8 @@ from flask import Blueprint, jsonify, redirect, request
 
 from flask_app.auth import login_required
 
+from . import PUBLIC_FRONTEND_ORIGIN
+FRONTEND_CART_PAGE = PUBLIC_FRONTEND_ORIGIN + "/logged-in-app/shopping-cart"
 
 kroger_cart_bp = Blueprint("kroger_cart", __name__)
 KROGER_AUTHORIZE_URL = "https://api.kroger.com/v1/connect/oauth2/authorize"
@@ -26,7 +28,6 @@ KROGER_TOKEN_URL = "https://api.kroger.com/v1/connect/oauth2/token"
 KROGER_CART_URL = "https://api.kroger.com/v1/cart/add"
 KROGER_CART_SCOPE = "cart.basic:write"
 KROGER_CART_PAGE = "https://www.kroger.com/cart"
-FRONTEND_CART_PAGE = "http://localhost:5173/logged-in-app/shopping-cart"
 UPC_PATTERN = re.compile(r"^\d{8,14}$")
 UPC_PATH_PATTERN = re.compile(r"/p/a/([^/?]+)")
 OAUTH_STATE_LIFETIME = timedelta(minutes=10)

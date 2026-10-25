@@ -7,5 +7,8 @@ export function load({ cookies }) {
     throw redirect(302, "/logged-in-app/studio");
   }
 
-  throw redirect(302, "http://localhost:5001/login", { external: true });
+  throw redirect(302, "https://prandium-ai.vercel.app/login", {
+    // hardcoded
+    external: true,
+  });
 }

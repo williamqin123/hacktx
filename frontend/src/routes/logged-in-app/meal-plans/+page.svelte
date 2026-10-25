@@ -61,7 +61,7 @@
 		error = '';
 
 		try {
-			const response = await apiFetch('http://localhost:5001/api/meal-plans');
+			const response = await apiFetch('api/meal-plans');
 			const result = await response.json();
 			if (!response.ok) {
 				throw new Error(result.error ?? 'Could not load saved meal plans.');
@@ -89,7 +89,7 @@
 		deletingPlanId = id;
 		try {
 			const response = await apiFetch(
-				`http://localhost:5001/api/meal-plans/${encodeURIComponent(id)}`,
+				`api/meal-plans/${encodeURIComponent(id)}`,
 				{ method: 'DELETE' }
 			);
 			const result = await response.json();

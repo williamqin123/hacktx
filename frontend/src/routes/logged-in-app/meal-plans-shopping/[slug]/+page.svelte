@@ -143,7 +143,7 @@
 		isLoadingProducts = true;
 		krogerError = '';
 		try {
-			const response = await apiFetch('http://localhost:5001/api/kroger/products', {
+			const response = await apiFetch('api/kroger/products', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ items })
@@ -177,7 +177,7 @@
 
 	async function loadSavedMealPlanShoppingList(mealPlanId: string) {
 		try {
-			const response = await apiFetch('http://localhost:5001/api/meal-plans');
+			const response = await apiFetch('api/meal-plans');
 			const result = await response.json();
 			if (!response.ok) {
 				throw new Error(result.error ?? 'Could not load the saved meal plan.');
@@ -289,7 +289,7 @@
 
 	async function loadCart() {
 		try {
-			const response = await apiFetch('http://localhost:5001/api/cart');
+			const response = await apiFetch('api/cart');
 			const result = await response.json();
 			if (!response.ok) {
 				throw new Error(result.error ?? 'Could not load your shopping cart.');
@@ -320,7 +320,7 @@
 			}
 		}
 
-		const response = await apiFetch('http://localhost:5001/api/cart', {
+		const response = await apiFetch('api/cart', {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ items: nextItems })

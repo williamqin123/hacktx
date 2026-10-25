@@ -15,6 +15,8 @@ from flask import (
 from authlib.integrations.flask_client import OAuth
 from authlib.jose import jwt, JsonWebKey
 
+from . import PUBLIC_FRONTEND_ORIGIN
+
 auth_bp = Blueprint("auth", __name__)
 
 oauth = OAuth()
@@ -137,13 +139,14 @@ def callback():
     id_token = token["id_token"]
 
     # Store the ID token in an HTTP-only cookie.
-    response = make_response(redirect("http://localhost:5173/logged-in-app/studio"))
+    response = make_response(redirect(PUBLIC_FRONTEND_ORIGIN + "/logged-in-app/studio"))
     response.set_cookie(
         "auth_token",
         id_token,
         httponly=True,
-        secure=not current_app.debug,
-        samesite="Lax",
+        #secure=not current_app.debug,
+        samesite="None",
+        secure=True,
         path="/",
     )
     return response

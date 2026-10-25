@@ -57,7 +57,7 @@
 		loading = true;
 		loadError = '';
 		try {
-			const response = await apiFetch('http://localhost:5001/api/saved-meals');
+			const response = await apiFetch('api/saved-meals');
 			const result = await response.json();
 			if (!response.ok) {
 				throw new Error(result.error ?? 'Could not load saved meals.');
@@ -75,7 +75,7 @@
 
 	async function loadCart() {
 		try {
-			const response = await apiFetch('http://localhost:5001/api/cart');
+			const response = await apiFetch('api/cart');
 			const result = await response.json();
 			if (!response.ok) {
 				throw new Error(result.error ?? 'Could not load your cart.');
@@ -115,7 +115,7 @@
 
 	async function saveCartItems(nextItems: CartItem[]) {
 		actionError = '';
-		const response = await apiFetch('http://localhost:5001/api/cart', {
+		const response = await apiFetch('api/cart', {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ items: nextItems })
@@ -165,7 +165,7 @@
 		busyMealId = id;
 		try {
 			const response = await apiFetch(
-				`http://localhost:5001/api/saved-meals/${encodeURIComponent(id)}`,
+				`api/saved-meals/${encodeURIComponent(id)}`,
 				{ method: 'DELETE' }
 			);
 			const result = await response.json();

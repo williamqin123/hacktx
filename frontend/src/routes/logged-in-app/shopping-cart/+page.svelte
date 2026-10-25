@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { apiFetch } from '#utils/api.js';
+	import { apiFetch, PUBLIC_API_URL } from '#utils/api.js';
 	import { Button } from '#lib/components/ui/button';
 	import { ShoppingCart, Trash2 } from '@lucide/svelte';
 
@@ -48,7 +48,7 @@
 		isLoading = true;
 		errorMessage = '';
 		try {
-			const response = await apiFetch('http://localhost:5001/api/cart');
+			const response = await apiFetch('api/cart');
 			const result = await response.json();
 			if (!response.ok) {
 				throw new Error(result.error ?? 'Could not load your shopping cart.');
@@ -66,7 +66,7 @@
 
 	async function loadKrogerConnection() {
 		try {
-			const response = await apiFetch('http://localhost:5001/api/kroger/connection');
+			const response = await apiFetch('api/kroger/connection');
 			const result = await response.json();
 			if (!response.ok) {
 				throw new Error(result.error ?? 'Could not check your Kroger connection.');
@@ -84,7 +84,7 @@
 		errorMessage = '';
 		actionMessage = '';
 		try {
-			const response = await apiFetch('http://localhost:5001/api/cart', {
+			const response = await apiFetch('api/cart', {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ items: nextItems })
@@ -131,13 +131,13 @@
 			return;
 		}
 		if (!isKrogerConnected) {
-			window.location.assign('http://localhost:5001/api/kroger/connect?checkout=1');
+			window.location.assign(PUBLIC_API_URL + '/api/kroger/connect?checkout=1');
 			return;
 		}
 
 		isCheckingOut = true;
 		try {
-			const response = await apiFetch('http://localhost:5001/api/kroger/cart', {
+			const response = await apiFetch('api/kroger/cart', {
 				method: 'POST'
 			});
 			const result = await response.json();

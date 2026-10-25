@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
-	import { apiFetch } from '#utils/api.js';
+	import { apiFetch, PUBLIC_API_URL } from '#utils/api.js';
 	import { Button } from '#lib/components/ui/button';
 	import { Card } from '#lib/components/ui/card';
 	import { Bookmark, BookmarkCheck, Clock3, Flame, ShoppingCart, Users } from '@lucide/svelte';
@@ -92,7 +92,7 @@
 		}
 
 		try {
-			const response = await apiFetch('http://localhost:5001/api/meal-plans');
+			const response = await apiFetch('api/meal-plans');
 			const result = await response.json();
 			if (!response.ok) {
 				throw new Error(result.error ?? 'Could not load the saved meal plan.');
@@ -119,7 +119,7 @@
 
 	async function loadSavedMeals() {
 		try {
-			const response = await apiFetch('http://localhost:5001/api/saved-meals');
+			const response = await apiFetch('api/saved-meals');
 			const result = await response.json();
 			if (!response.ok) {
 				throw new Error(result.error ?? 'Could not load saved meals.');
@@ -150,8 +150,8 @@
 		try {
 			const response = await apiFetch(
 				savedId
-					? `http://localhost:5001/api/saved-meals/${encodeURIComponent(savedId)}`
-					: 'http://localhost:5001/api/saved-meals',
+					? `${PUBLIC_API_URL}/api/saved-meals/${encodeURIComponent(savedId)}`
+					: `${PUBLIC_API_URL}/api/saved-meals`,
 				savedId
 					? { method: 'DELETE' }
 					: {
@@ -211,7 +211,7 @@
 
 	async function loadCart() {
 		try {
-			const response = await apiFetch('http://localhost:5001/api/cart');
+			const response = await apiFetch('api/cart');
 			const result = await response.json();
 			if (!response.ok) {
 				throw new Error(result.error ?? 'Could not load your shopping cart.');
@@ -248,7 +248,7 @@
 					nextItems.push(item);
 				}
 			}
-			const response = await apiFetch('http://localhost:5001/api/cart', {
+			const response = await apiFetch('api/cart', {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ items: nextItems })
