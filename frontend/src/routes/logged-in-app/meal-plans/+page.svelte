@@ -1,191 +1,241 @@
-
 <script lang="ts">
-    import { Button } from '#lib/components/ui/button';
-    import { Card } from '#lib/components/ui/card';
-    import { Badge } from '#lib/components/ui/badge';
-    import { Separator } from '#lib/components/ui/separator';
-    import {
-        Trash2,
-        ShoppingCart,
-        CalendarDays,
-        Users,
-        UtensilsCrossed,
-        Plus
-    } from '@lucide/svelte';
+	import { onMount } from 'svelte';
+	import { Button } from '#lib/components/ui/button';
+	import { Card } from '#lib/components/ui/card';
+	import { Separator } from '#lib/components/ui/separator';
+	import {
+		BookOpen,
+		CalendarDays,
+		Clock3,
+		Flame,
+		ShoppingCart,
+		UtensilsCrossed,
+		Users,
+		X
+	} from '@lucide/svelte';
+	import { apiFetch } from '#utils/api.js';
 
-    type MealPlan = {
-        id: string;
-        slug: string;
-        name: string;
-        days: number;
-        people: number;
-        image: string;
-    };
+	type Meal = {
+		name: string;
+		estimated_calories_kcal_per_person: number;
+		ingredients: string[];
+		prep_time: number;
+		Recipe: string[];
+		shopping_list?: Array<{
+			ingredient: string;
+			quantity: string;
+			products: Array<{
+				title?: string;
+				primary_offer?: { offer_price?: number | string };
+				product_page_url?: string;
+			}>;
+		}>;
+	};
 
-    let mealPlans = $state<MealPlan[]>([
-        {
-            id: '1',
-            slug: 'healthy-mediterranean-week',
-            name: 'Healthy Mediterranean Week',
-            days: 7,
-            people: 2,
-            image: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=400&h=300&fit=crop'
-        },
-        {
-            id: '2',
-            slug: 'high-protein-meal-prep',
-            name: 'High Protein Meal Prep',
-            days: 5,
-            people: 1,
-            image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop'
-        },
-        {
-            id: '3',
-            slug: 'family-dinner-plan',
-            name: 'Family Dinner Plan',
-            days: 7,
-            people: 4,
-            image: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=400&h=300&fit=crop'
-        },
-        {
-            id: '4',
-            slug: 'quick-and-easy-meals',
-            name: 'Quick and Easy Meals',
-            days: 3,
-            people: 2,
-            image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=300&fit=crop'
-        },
-        {
-            id: '5',
-            slug: 'budget-friendly-weekly-plan',
-            name: 'Budget-Friendly Weekly Plan',
-            days: 7,
-            people: 3,
-            image: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&h=300&fit=crop'
-        }
-    ]);
+	type MealPlan = {
+		id: string;
+		meal_plan: {
+			days: number;
+			people: number;
+			diet?: string;
+			daily_meals: Array<{
+				day: number;
+				meals: Record<string, Meal>;
+			}>;
+		};
+		grocery_list: Array<{ item: string; quantity: string }>;
+	};
 
-    function deleteMealPlan(id: string) {
-        mealPlans = mealPlans.filter((plan) => plan.id !== id);
-    }
+	let mealPlans = $state<MealPlan[]>([]);
+	let loading = $state(true);
+	let error = $state('');
+	let deleteError = $state('');
+	let deletingPlanId = $state('');
 
-    function openMealPlan(slug: string) {
-        window.location.href = `/meal-plans/${slug}`;
-    }
+	onMount(() => {
+		loadMealPlans();
+	});
 
-    function openShoppingList(slug: string) {
-        window.location.href = `/meal-plans/${slug}/shopping-list`;
-    }
+	async function loadMealPlans() {
+		loading = true;
+		error = '';
+
+		try {
+			const response = await apiFetch('http://localhost:5001/api/meal-plans');
+			const result = await response.json();
+			if (!response.ok) {
+				throw new Error(result.error ?? 'Could not load saved meal plans.');
+			}
+			if (!Array.isArray(result.meal_plans)) {
+				throw new Error('The response did not include a meal_plans list.');
+			}
+			mealPlans = result.meal_plans;
+		} catch (loadError) {
+			error =
+				loadError instanceof Error
+					? loadError.message
+					: 'Could not load saved meal plans.';
+		} finally {
+			loading = false;
+		}
+	}
+
+	function openShoppingList(id: string) {
+		window.location.href = `/logged-in-app/meal-plans-shopping/${id}`;
+	}
+
+	async function deleteMealPlan(id: string) {
+		deleteError = '';
+		deletingPlanId = id;
+		try {
+			const response = await apiFetch(
+				`http://localhost:5001/api/meal-plans/${encodeURIComponent(id)}`,
+				{ method: 'DELETE' }
+			);
+			const result = await response.json();
+			if (!response.ok) {
+				throw new Error(result.error ?? 'Could not delete this meal plan.');
+			}
+
+			mealPlans = mealPlans.filter((plan) => plan.id !== id);
+			sessionStorage.removeItem(`meal-plan-shopping:${id}`);
+		} catch (requestError) {
+			deleteError =
+				requestError instanceof Error
+					? requestError.message
+					: 'Could not delete this meal plan.';
+		} finally {
+			deletingPlanId = '';
+		}
+	}
 </script>
 
 <svelte:head>
-    <title>My Meal Plans</title>
-    <meta
-        name="description"
-        content="View and manage your saved meal plans."
-    />
+	<title>My Meal Plans</title>
+	<meta name="description" content="Generated meal plans saved in the database." />
 </svelte:head>
 
 <div class="mx-auto flex h-full min-h-0 w-full max-w-5xl flex-col gap-6 p-4 sm:p-6">
-    <div>
-        <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">
-            My Meal Plans
-        </h1>
-        <p class="mt-1 text-sm text-muted-foreground">
-            Manage your meal plans and shopping lists.
-        </p>
-    </div>
+	<header>
+		<h1 class="text-2xl font-bold tracking-tight sm:text-3xl">My Meal Plans</h1>
+		<p class="mt-1 text-sm text-muted-foreground">
+			Each saved plan contains its days and meals.
+		</p>
+	</header>
 
-    <Separator />
+	<Separator />
 
-    <p class="text-sm text-muted-foreground">
-        {mealPlans.length} {mealPlans.length === 1 ? 'meal plan' : 'meal plans'}
-    </p>
+	{#if deleteError}
+		<p class="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive" role="alert">
+			{deleteError}
+		</p>
+	{/if}
 
-    <div class="min-h-0 flex-1 overflow-y-auto">
-        {#if mealPlans.length === 0}
-            <div class="flex min-h-64 flex-col items-center justify-center gap-3 rounded-xl border border-dashed p-8 text-center">
-                <div class="rounded-full bg-muted p-4">
-                    <UtensilsCrossed class="size-7 text-muted-foreground" />
-                </div>
-                <h2 class="text-lg font-semibold">No meal plans yet</h2>
-                <p class="max-w-sm text-sm text-muted-foreground">
-                    Your meal plans will appear here once you create them.
-                </p>
-            </div>
-        {:else}
-            <div class="flex flex-col gap-3 pb-4">
-                {#each mealPlans as plan (plan.id)}
-                    <Card
-                        class="cursor-pointer overflow-hidden p-0 transition-colors hover:bg-muted/50"
-                    >
-                        <div
-                            role="link"
-                            tabindex="0"
-                            aria-label={`Open ${plan.name}`}
-                            class="flex min-w-0 items-center gap-3 p-3 sm:gap-5 sm:p-4"
-                            onclick={() => openMealPlan(plan.slug)}
-                            onkeydown={(event) => {
-                                if (event.target !== event.currentTarget) return;
-                                if (event.key === 'Enter' || event.key === ' ') {
-                                    event.preventDefault();
-                                    openMealPlan(plan.slug);
-                                }
-                            }}
-                        >
-                            <img
-                                src={plan.image}
-                                alt={plan.name}
-                                class="size-20 shrink-0 rounded-lg object-cover sm:size-28"
-                                loading="lazy"
-                            />
+	{#if loading}
+		<p class="py-12 text-center text-sm text-muted-foreground">Loading meal plans...</p>
+	{:else if error}
+		<section class="flex flex-col items-start gap-3 rounded-xl border p-6" role="alert">
+			<p class="text-sm text-destructive">{error}</p>
+			<Button variant="outline" size="sm" onclick={loadMealPlans}>Try again</Button>
+		</section>
+	{:else if mealPlans.length === 0}
+		<div class="flex min-h-64 flex-col items-center justify-center gap-3 rounded-xl border border-dashed p-8 text-center">
+			<div class="rounded-full bg-muted p-4">
+				<UtensilsCrossed class="size-7 text-muted-foreground" />
+			</div>
+			<h2 class="text-lg font-semibold">No meal plans yet</h2>
+			<p class="max-w-sm text-sm text-muted-foreground">
+				Generate a meal plan and it will appear here with all of its days and meals.
+			</p>
+			<Button href="/logged-in-app/studio">Generate a meal plan</Button>
+		</div>
+	{:else}
+		<div class="flex items-center justify-between">
+			<p class="text-sm text-muted-foreground">
+				{mealPlans.length} saved {mealPlans.length === 1 ? 'meal plan' : 'meal plans'}
+			</p>
+			<Button variant="outline" size="sm" onclick={loadMealPlans}>Refresh</Button>
+		</div>
 
-                            <div class="min-w-0 flex-1">
-                                <h2 class="truncate text-sm font-semibold sm:text-base">
-                                    {plan.name}
-                                </h2>
+		<div class="space-y-5">
+			{#each mealPlans as plan (plan.id)}
+				<Card class="relative space-y-5 p-5">
+					<Button
+						variant="ghost"
+						size="icon"
+						class="absolute right-3 top-3 size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+						aria-label={`Delete ${plan.meal_plan.diet || 'meal plan'}`}
+						title="Delete meal plan"
+						disabled={Boolean(deletingPlanId)}
+						onclick={() => deleteMealPlan(plan.id)}
+					>
+						<X class="size-4" />
+					</Button>
+					<header class="flex flex-wrap items-start justify-between gap-3 pr-10">
+						<div>
+							<h2 class="text-xl font-semibold">
+								{plan.meal_plan.diet || 'Generated meal plan'}
+							</h2>
+							<div class="mt-2 flex flex-wrap gap-4 text-sm text-muted-foreground">
+								<span class="inline-flex items-center gap-1.5">
+									<CalendarDays class="size-4" />
+									{plan.meal_plan.days} {plan.meal_plan.days === 1 ? 'day' : 'days'}
+								</span>
+								<span class="inline-flex items-center gap-1.5">
+									<Users class="size-4" />
+									{plan.meal_plan.people}
+									{plan.meal_plan.people === 1 ? 'person' : 'people'}
+								</span>
+							</div>
+						</div>
+						<div class="flex flex-wrap gap-2">
+							<Button
+								variant="outline"
+								size="sm"
+								href={`/logged-in-app/meal-plan-recipes/${plan.id}`}
+							>
+								<BookOpen class="mr-2 size-4" />
+								View Recipes
+							</Button>
+							<Button size="sm" onclick={() => openShoppingList(plan.id)}>
+							<ShoppingCart class="mr-2 size-4" />
+							Shopping List
+							</Button>
+						</div>
+					</header>
 
-                                <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-muted-foreground sm:gap-x-4 sm:text-sm">
-                                    <span class="inline-flex items-center gap-1.5">
-                                        <CalendarDays class="size-4 shrink-0" />
-                                        {plan.days} {plan.days === 1 ? 'day' : 'days'}
-                                    </span>
-
-                                    <span class="inline-flex items-center gap-1.5">
-                                        <Users class="size-4 shrink-0" />
-                                        {plan.people} {plan.people === 1 ? 'person' : 'people'}
-                                    </span>
-                                </div>
-
-                                <div
-                                    class="mt-3 flex flex-wrap items-center gap-2"
-                                    onclick={(event) => event.stopPropagation()}
-                                    onkeydown={(event) => event.stopPropagation()}
-                                >
-                                    <Button
-                                        size="sm"
-                                        onclick={() => openShoppingList(plan.slug)}
-                                    >
-                                        <ShoppingCart class="mr-2 size-4" />
-                                        Shopping List
-                                    </Button>
-
-                                    <Button
-                                        size="icon"
-                                        variant="outline"
-                                        class="size-9 text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                                        aria-label={`Delete ${plan.name}`}
-                                        title="Delete meal plan"
-                                        onclick={() => deleteMealPlan(plan.id)}
-                                    >
-                                        <Trash2 class="size-4" />
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-                    </Card>
-                {/each}
-            </div>
-        {/if}
-    </div>
+					<div class="space-y-4">
+						{#each plan.meal_plan.daily_meals as day (day.day)}
+							<section class="rounded-lg border p-4">
+								<h3 class="font-semibold">Day {day.day}</h3>
+								<div class="mt-3 grid gap-3 md:grid-cols-3">
+									{#each Object.entries(day.meals) as [mealType, meal] (mealType)}
+										<article class="rounded-md bg-muted/40 p-3">
+											<p class="text-xs font-semibold uppercase tracking-wide text-primary">
+												{mealType}
+											</p>
+											<h4 class="mt-1 font-medium">{meal.name}</h4>
+											<div class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+												<span class="inline-flex items-center gap-1">
+													<Flame class="size-3.5" />
+													{meal.estimated_calories_kcal_per_person} kcal/person
+												</span>
+												<span class="inline-flex items-center gap-1">
+													<Clock3 class="size-3.5" />
+													{meal.prep_time} min
+												</span>
+											</div>
+											<p class="mt-2 line-clamp-2 text-xs text-muted-foreground">
+												{meal.ingredients.join(', ')}
+											</p>
+										</article>
+									{/each}
+								</div>
+							</section>
+						{/each}
+					</div>
+				</Card>
+			{/each}
+		</div>
+	{/if}
 </div>

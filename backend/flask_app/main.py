@@ -8,6 +8,7 @@ from flask import (
     url_for,
 )
 import math
+import re
 
 main_bp = Blueprint("main", __name__)
 
@@ -47,6 +48,7 @@ def validate_user_info_json(data):
     goal = data["goal"]
     activity_level = data["activityLevel"]
     dietary_restrictions = data["dietaryRestrictions"]
+    zip_code = data.get("zipCode", "")
 
     if not isinstance(dislikes, str):
         raise ValueError("'dislikes' must be a string")
@@ -117,3 +119,9 @@ def validate_user_info_json(data):
         raise ValueError(
             "'dietaryRestrictions' must be a list of supported restrictions"
         )
+
+    if (
+        not isinstance(zip_code, str)
+        or (zip_code and not re.fullmatch(r"\d{5}(?:-\d{4})?", zip_code))
+    ):
+        raise ValueError("'zipCode' must be a valid U.S. ZIP code")

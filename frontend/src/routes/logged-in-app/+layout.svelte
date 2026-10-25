@@ -5,7 +5,9 @@
 		LayoutDashboard,
 		BookOpen,
 		User,
-		Settings
+		Settings,
+		Bookmark,
+		ShoppingCart
 	} from '@lucide/svelte';
 
 	let { children } = $props();
@@ -14,6 +16,8 @@
 		{ label: 'Profile', href: '/logged-in-app/profile', icon: User },
 		{ label: 'Studio', href: '/logged-in-app/studio', icon: Sparkles },
 		{ label: 'Meal Plans', href: '/logged-in-app/meal-plans', icon: BookOpen },
+		{ label: 'Saved Meals', href: '/logged-in-app/saved-meals', icon: Bookmark },
+		{ label: 'Cart', href: '/logged-in-app/shopping-cart', icon: ShoppingCart },
 		//{ label: 'Orders', href: '/logged-in-app/orders/', icon: LayoutDashboard },
 		//{ label: 'Settings', href: '/logged-in-app/settings', icon: Settings }
 	];
@@ -76,7 +80,7 @@
 
 	.nav-tabs {
 		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
+		grid-template-columns: repeat(5, minmax(0, 1fr));
 		width: 100%;
 		max-width: 600px;
 		margin: 0 auto;

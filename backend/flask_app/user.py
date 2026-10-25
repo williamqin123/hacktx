@@ -35,6 +35,7 @@ def set_profile_info():
         user_ref = db.collection("users").document(user_id)
 
         user_doc = user_ref.get()
+        existing_profile = (user_doc.to_dict() or {}).get("profile", {})
 
         profile = {
             "name": data.get("name", ""),
@@ -42,8 +43,16 @@ def set_profile_info():
             "sex": data.get("sex", ""),
             "height": data.get("height"),
             "weight": data.get("weight"),
+            "dislikes": data.get("dislikes", ""),
+            "activityLevel": data.get("activityLevel"),
             "dietaryRestrictions": data.get("dietaryRestrictions", []),
             "goal": data.get("goal", "maintain"),
+            "zipCode": data.get(
+                "zipCode",
+                existing_profile.get("zipCode", "")
+                if isinstance(existing_profile, dict)
+                else "",
+            ),
         }
 
         user_data = {"profile": profile}
