@@ -394,7 +394,7 @@
 										<h4 class="font-semibold">Ingredients</h4>
 										{#if meal.ingredients?.length}
 											<ul class="mt-2 list-inside list-disc space-y-1 text-sm text-muted-foreground">
-												{#each meal.ingredients as ingredient (ingredient)}
+												{#each meal.ingredients as ingredient, ingredientIndex (`${ingredient}-${ingredientIndex}`)}
 													<li>{ingredient}</li>
 												{/each}
 											</ul>

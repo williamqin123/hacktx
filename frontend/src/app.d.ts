@@ -14,7 +14,10 @@ export {};
 
 /// <reference types="@sveltejs/kit" />
 
-// If the error persists, you can explicitly define the module right below it:
-declare module "$env/static/public" {
-  export const PUBLIC_API_URL: string;
+interface ImportMetaEnv {
+  readonly VITE_API_URL?: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
 }
