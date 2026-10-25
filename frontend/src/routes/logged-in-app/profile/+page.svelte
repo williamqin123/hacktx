@@ -47,7 +47,7 @@
 			};
 
 			const response = await apiFetch(
-				'http://localhost:5001/set-profile-info',
+				'set-profile-info',
 				{
 					method: 'POST',
 					headers: {
@@ -79,7 +79,7 @@
 
 		try {
 			const response = await apiFetch(
-				'http://localhost:5001/get-profile-info'
+				'get-profile-info'
 			);
 
 			if (response.status === 404) {
