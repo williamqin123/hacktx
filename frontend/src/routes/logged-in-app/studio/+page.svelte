@@ -21,11 +21,20 @@
 
     let description = $state("");
 
+	let age = $state<number | undefined>(undefined);
+	let sex = $state('');
+	let height = $state<number | undefined>(undefined);
+	let weight = $state<number | undefined>(undefined);
+	let activityLevel = $state('sedentary');
 	let dietaryRestrictions = $state<string[]>([]);
+
 	let dietGoal = $state('maintain');
-	import DietaryRestrictionsPicker from '#components/DietaryRestrictionsPicker.svelte';
+    let exclusions = $state<string>('');
 	import DietaryGoalPicker from '#components/DietaryGoalPicker.svelte';
 
+    let numPeople = $state(1);
+
+    let isLoadingUserSavedDietaryPreferences = $state(true);
     let isSubmitting = $state(false);
     let errorMessage = $state("");
 
@@ -47,9 +56,16 @@
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    description: description.trim(),
+                    diet: description.trim(),
                     dietaryRestrictions: dietaryRestrictions,
-                    dietGoal: dietGoal
+                    goal: dietGoal,
+                    age,
+                    sex,
+                    height,
+                    weight,
+                    dislikes: exclusions,
+                    activityLevel,
+                    people: numPeople
                 })
             });
 
@@ -69,6 +85,49 @@
             isSubmitting = false;
         }
     }
+
+    import { onMount } from 'svelte';
+
+	async function loadProfile() {
+		isLoadingUserSavedDietaryPreferences = true;
+		errorMessage = '';
+
+		try {
+			const response = await apiFetch(
+				'http://localhost:5001/get-profile-info'
+			);
+
+			if (response.status === 404) {
+				// No profile exists yet; keep the default field values.
+				return;
+			}
+
+			if (!response.ok) {
+				throw new Error('Failed to load profile.');
+			}
+
+			const profile = await response.json();
+
+            age = profile.age ?? undefined;
+			sex = profile.sex ?? '';
+			height = profile.height ?? undefined;
+			weight = profile.weight ?? undefined;
+			dietaryRestrictions = profile.dietaryRestrictions ?? [];
+			dietGoal = profile.goal ?? 'maintain';
+            activityLevel = profile.activityLevel ?? 'sedentary';
+		} catch (error) {
+			errorMessage =
+				error instanceof Error
+					? error.message
+					: 'Failed to load profile.';
+		} finally {
+			isLoadingUserSavedDietaryPreferences = false;
+		}
+	}
+
+	onMount(() => {
+		loadProfile();
+	});
 </script>
 
 <main class="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-10">
@@ -114,16 +173,35 @@
                     <Collapsible.Trigger
                         class="flex w-full items-center justify-between rounded-md py-2 text-sm font-medium hover:underline"
                     >
-                        Override Your Default Dietary Preferences
+                        Override Your Saved Dietary Preferences
                         <ChevronDown class="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                     </Collapsible.Trigger>
 
                     <Collapsible.Content class="space-y-4">
+                        {#if isLoadingUserSavedDietaryPreferences}
+                        <p class="text-sm text-muted-foreground">
+                            Loading your saved dietary preferences...
+                        </p>
+                        {:else}
                         <section class="space-y-4">
-                            <DietaryRestrictionsPicker bind:value={dietaryRestrictions} />
+                            <h2 class="text-lg font-semibold">
+                                Dislikes / Exclusions
+                            </h2>
+                            <div class="space-y-2">
+                                <Label for="dish-instructions">
+                                    Dislikes / Exclusions
+                                </Label>
+                                <Textarea
+                                    id="exclude"
+                                    bind:value={exclusions}
+                                    placeholder="e.g. No ranch sauce"
+                                    rows={3}
+                                />
+                            </div>
                             <Separator />
                             <DietaryGoalPicker bind:dietGoal={dietGoal} />
                         </section>
+                        {/if}
                     </Collapsible.Content>
                 </Collapsible.Root>
 

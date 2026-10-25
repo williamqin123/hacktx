@@ -17,18 +17,18 @@ def create_meal_plan():
 
     required_fields = {
         "people",
-        "budget",
+        # "budget",
         "diet",
         "days",
         "dislikes",
-        "name",
+        # "name",
         "age",
         "sex",
         "height",
         "weight",
         "goal",
-        "activity_level",
-        "dietary_restrictions",
+        "activityLevel",
+        "dietaryRestrictions",
     }
     missing_fields = sorted(required_fields - data.keys())
     if missing_fields:
@@ -38,21 +38,22 @@ def create_meal_plan():
         }), 400
 
     people = data["people"]
-    budget = data["budget"]
+    # budget = data["budget"]
     diet = data["diet"]
     days = data["days"]
     dislikes = data["dislikes"]
-    name = data["name"]
+    # name = data["name"]
     age = data["age"]
     sex = data["sex"]
     height = data["height"]
     weight = data["weight"]
     goal = data["goal"]
-    activity_level = data["activity_level"]
-    dietary_restrictions = data["dietary_restrictions"]
+    activity_level = data["activityLevel"]
+    dietary_restrictions = data["dietaryRestrictions"]
 
     if isinstance(people, bool) or not isinstance(people, int) or people < 1:
         return jsonify({"error": "'people' must be a positive integer"}), 400
+    '''
     if (
         isinstance(budget, bool)
         or not isinstance(budget, (int, float))
@@ -60,14 +61,17 @@ def create_meal_plan():
         or budget < 0
     ):
         return jsonify({"error": "'budget' must be a non-negative number"}), 400
+    '''
     if not isinstance(diet, str) or not diet.strip():
         return jsonify({"error": "'diet' must be a non-empty string"}), 400
     if isinstance(days, bool) or not isinstance(days, int) or days < 1:
         return jsonify({"error": "'days' must be a positive integer"}), 400
     if not isinstance(dislikes, str):
         return jsonify({"error": "'dislikes' must be a string"}), 400
+    '''
     if not isinstance(name, str) or not name.strip():
         return jsonify({"error": "'name' must be a non-empty string"}), 400
+    '''
     if isinstance(age, bool) or not isinstance(age, int) or not 1 <= age <= 120:
         return jsonify({"error": "'age' must be an integer from 1 to 120"}), 400
     allowed_sexes = {
@@ -134,11 +138,11 @@ def create_meal_plan():
     try:
         meal_plan = generate_meal_plan(
             people=people,
-            budget=budget,
+            #budget=budget,
             diet=diet,
             days=days,
             dislikes=dislikes,
-            name=name.strip(),
+            #name=name.strip(),
             age=age,
             sex=sex,
             height=height,
@@ -153,18 +157,29 @@ def create_meal_plan():
             "details": str(error),
         }), 502
 
-    from WalmartAPI import RESULTS_FILE, search_walmart_items
+    
+
+    return jsonify(meal_plan), 200
+
+from WalmartAPI import search_walmart_items
+
+@walmart_bp.route("/api/walmart-search", methods=["POST"])
+def get_walmart_results():
+    if not request.is_json:
+        return jsonify({"error": "Request body must be JSON"}), 400
+
+    data = request.get_json()
+    if not isinstance(data, dict):
+        return jsonify({"error": "Request body must be a JSON object"}), 400
+
+    items = data["items"]
 
     try:
-        walmart_results = search_walmart_items(meal_plan)
+        walmart_results = search_walmart_items(items)
     except ValueError as error:
         return jsonify({
             "error": "Could not extract grocery items from the Gemini response",
             "details": str(error),
         }), 502
 
-    return jsonify({
-        **meal_plan,
-        "walmart_results": walmart_results["walmart_results"],
-        "results_file": RESULTS_FILE.name,
-    }), 200
+    return jsonify(walmart_results["walmart_results"]), 200
