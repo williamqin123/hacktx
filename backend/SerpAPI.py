@@ -2,9 +2,9 @@ import os
 import json
 
 import serpapi
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 
-load_dotenv()
+#load_dotenv()
 
 
 AGENT_INSTRUCTIONS = """

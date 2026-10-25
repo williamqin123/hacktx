@@ -2,9 +2,9 @@ import json
 import os
 
 import serpapi
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
-load_dotenv()
+# load_dotenv()
 
 STORE_ID = 3569
 

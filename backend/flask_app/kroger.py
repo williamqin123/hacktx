@@ -9,7 +9,7 @@ from typing import Any
 from urllib.parse import quote
 
 import requests
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 from firebase_admin import firestore
 from flask import Blueprint, jsonify, request
 
@@ -209,7 +209,7 @@ def get_kroger_products():
                 "error": "Add a valid U.S. ZIP code to your profile to find nearby Kroger pickup products."
             }), 400
 
-        load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+        #load_dotenv(Path(__file__).resolve().parents[1] / ".env")
         client_id = os.environ.get("KROGER_CLIENT_ID")
         client_secret = os.environ.get("KROGER_API_SECRET")
         if not client_id or not client_secret:

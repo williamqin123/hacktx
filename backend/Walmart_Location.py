@@ -1,7 +1,7 @@
 import os
 import serpapi
 import json
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 
 #https://serpapi.com/google-maps-api
 
@@ -24,7 +24,7 @@ COORDINATES = """@30.291171,-97.735766,14z"""
 with open("walmart-stores.json", "r", encoding="utf-8") as f:
     stores = json.load(f)
 
-load_dotenv()
+# load_dotenv()
 
 client = serpapi.Client(api_key= os.getenv("SERPAPI_KEY"))
 

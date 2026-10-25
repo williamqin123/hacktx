@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 import requests
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from firebase_admin import credentials, firestore, initialize_app
 
 
@@ -66,7 +66,7 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
 def initialize_firestore() -> Any:
     """Initialize Firebase Admin from the configured service-account JSON."""
-    load_dotenv(Path(__file__).with_name(".env"))
+    # load_dotenv(Path(__file__).with_name(".env"))
     try:
         from firebase_admin import get_app
 
@@ -304,7 +304,7 @@ def run_search(
     output_path: Path | None = None,
 ) -> None:
     """Search item lists in user meal plans, recipes, and saved meals."""
-    load_dotenv(Path(__file__).with_name(".env"))
+    # load_dotenv(Path(__file__).with_name(".env"))
     client_id = os.environ.get("KROGER_CLIENT_ID")
     client_secret = os.environ.get("KROGER_API_SECRET")
     if not client_id or not client_secret:

@@ -1,8 +1,10 @@
 import os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
+'''
 # Loads variables from .env into os.environ before anything else
 load_dotenv()
+'''
 
 from flask_app import create_app
 

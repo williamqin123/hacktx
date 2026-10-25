@@ -13,7 +13,7 @@ from urllib.parse import urlencode, urlparse
 
 import requests
 from cryptography.fernet import Fernet, InvalidToken
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from firebase_admin import firestore
 from flask import Blueprint, jsonify, redirect, request
 
@@ -38,7 +38,7 @@ class KrogerConnectionRequired(Exception):
 
 
 def _load_kroger_config():
-    load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
+    #load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
     client_id = os.environ.get("KROGER_CLIENT_ID")
     client_secret = os.environ.get("KROGER_API_SECRET")
     redirect_uri = os.environ.get("KROGER_REDIRECT_URI")
