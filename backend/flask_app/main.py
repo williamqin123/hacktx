@@ -10,11 +10,13 @@ from flask import (
 import math
 import re
 
+from . import PUBLIC_FRONTEND_ORIGIN
+
 main_bp = Blueprint("main", __name__)
 
 @main_bp.route("/") # user arrives here after logging out -> redirect to frontend homepage
 def home():
-    return redirect("http://localhost:5173")
+    return redirect(PUBLIC_FRONTEND_ORIGIN)
 
 def validate_user_info_json(data):
     required_fields = {

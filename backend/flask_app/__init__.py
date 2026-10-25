@@ -5,6 +5,8 @@ from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials, firestore
 
+PUBLIC_FRONTEND_ORIGIN = 'https://prandium-ai.onrender.com'
+
 creds_env = os.environ.get('FIREBASE_CREDENTIALS_JSON')
 
 # 1. Check if the app is already initialized to avoid duplicate app errors
@@ -21,7 +23,7 @@ def create_app():
 
     CORS(
         app,
-        origins=["http://localhost:5173"],
+        origins=[PUBLIC_FRONTEND_ORIGIN],
         supports_credentials=True,
     )
     
