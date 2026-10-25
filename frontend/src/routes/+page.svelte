@@ -1,175 +1,238 @@
 <script lang="ts">
-	import { ArrowRight, ChefHat } from '@lucide/svelte';
+	import type { PageProps } from './$types';
+	import { ArrowRight, ChefHat, Heart } from '@lucide/svelte';
 	import { Button } from '#lib/components/ui/button';
-	import { Input } from '#lib/components/ui/input';
-	import { Label } from '#lib/components/ui/label';
-	import { Separator } from '#lib/components/ui/separator';
-	import DietaryRestrictionsPicker from '#components/DietaryRestrictionsPicker.svelte';
-	import DietaryGoalPicker from '#components/DietaryGoalPicker.svelte';
 
-	const onboardingProfileKey = 'pending-onboarding-profile';
-
-	let name = $state('');
-	let age = $state<number | undefined>();
-	let sex = $state('');
-	let height = $state<number | undefined>();
-	let weight = $state<number | undefined>();
-	let activityLevel = $state('sedentary');
-	let dislikes = $state('');
-	let dietaryRestrictions = $state<string[]>([]);
-	let goal = $state('maintain');
-	let errorMessage = $state('');
-
-	function continueToLogin(event: SubmitEvent) {
-		event.preventDefault();
-		errorMessage = '';
-
-		if (age === undefined || !Number.isInteger(age) || age < 1 || age > 120) {
-			errorMessage = 'Enter an age between 1 and 120.';
-			return;
-		}
-		if (!sex) {
-			errorMessage = 'Select an option for sex.';
-			return;
-		}
-		if (!height || height < 1 || height > 300) {
-			errorMessage = 'Enter a height between 1 and 300 cm.';
-			return;
-		}
-		if (!weight || weight < 1 || weight > 700) {
-			errorMessage = 'Enter a weight between 1 and 700 kg.';
-			return;
-		}
-
-		sessionStorage.setItem(
-			onboardingProfileKey,
-			JSON.stringify({
-				name: name.trim(),
-				age,
-				sex,
-				height,
-				weight,
-				activityLevel,
-				dislikes: dislikes.trim(),
-				dietaryRestrictions,
-				goal
-			})
-		);
-		window.location.assign('/login');
-	}
+	let { data }: PageProps = $props();
 </script>
 
 <svelte:head>
-	<title>Set up your profile — Recipe Studio</title>
+	<title>Prandium AI — Meals made your way</title>
 	<meta
 		name="description"
-		content="Set your profile and food preferences before creating personalized meal plans."
+		content="Good food, planned around you."
 	/>
 </svelte:head>
 
-<main class="min-h-screen bg-muted/30 px-4 py-8 sm:py-12">
-	<div class="mx-auto w-full max-w-2xl space-y-8 rounded-2xl border bg-background p-5 shadow-sm sm:p-8">
-		<header class="space-y-3 text-center">
-			<div class="mx-auto flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-				<ChefHat class="size-6" />
-			</div>
-			<p class="text-sm font-semibold uppercase tracking-wide text-primary">Recipe Studio setup</p>
-			<h1 class="text-3xl font-bold tracking-tight">Let’s personalize your meals</h1>
-			<p class="text-sm text-muted-foreground">
-				First tell us about yourself and your food preferences. Then sign in to save them to your account.
-			</p>
+<main class="landing-page">
+	<div class="landing-shell">
+		<header class="landing-header">
+			<a href="/" class="brand" aria-label="Prandium AI home">
+				<span class="brand-mark"><ChefHat class="size-5" /></span>
+				<span>Prandium <span class="brand-accent">AI</span></span>
+			</a>
 		</header>
 
-		<form onsubmit={continueToLogin} class="space-y-8">
-			<section class="space-y-4">
-				<h2 class="text-lg font-semibold">Your profile</h2>
-				<div class="space-y-2">
-					<Label for="name">Name</Label>
-					<Input id="name" bind:value={name} placeholder="Your name" />
-				</div>
+		<section class="hero" aria-labelledby="welcome-heading">
+			<div class="hero-copy">
+				<p class="eyebrow"><Heart class="size-4" /> MADE WITH YOU IN MIND</p>
+				<h1 id="welcome-heading">Good food, <span>your way.</span></h1>
+				<p class="hero-description">Meals you love, made simple.</p>
+			</div>
 
-				<div class="grid gap-4 sm:grid-cols-2">
-					<div class="space-y-2">
-						<Label for="age">Age</Label>
-						<Input id="age" type="number" bind:value={age} min={1} max={120} required />
-					</div>
-					<div class="space-y-2">
-						<Label for="sex">Sex</Label>
-						<select
-							id="sex"
-							bind:value={sex}
-							required
-							class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-						>
-							<option value="">Select</option>
-							<option value="female">Female</option>
-							<option value="male">Male</option>
-							<option value="intersex">Intersex</option>
-							<option value="other">Other</option>
-							<option value="prefer_not_to_say">Prefer not to say</option>
-						</select>
-					</div>
-					<div class="space-y-2">
-						<Label for="height">Height (cm)</Label>
-						<Input id="height" type="number" bind:value={height} min={1} max={300} required />
-					</div>
-					<div class="space-y-2">
-						<Label for="weight">Weight (kg)</Label>
-						<Input
-							id="weight"
-							type="number"
-							bind:value={weight}
-							min={1}
-							max={700}
-							step="0.1"
-							required
-						/>
-					</div>
-				</div>
-
-				<div class="space-y-2">
-					<Label for="activity-level">Activity level</Label>
-					<select
-						id="activity-level"
-						bind:value={activityLevel}
-						class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+			<div class="welcome-actions">
+				<div class="hero-actions">
+					<Button
+						href={data.isAuthenticated ? '/logged-in-app/studio' : '/setup'}
+						size="lg"
+						class="get-started-button"
 					>
-						<option value="sedentary">Sedentary — little or no exercise</option>
-						<option value="lightly_active">Lightly active — exercise 1–3 days/week</option>
-						<option value="moderately_active">Moderately active — exercise 3–5 days/week</option>
-						<option value="very_active">Very active — exercise 6–7 days/week</option>
-						<option value="extra_active">Extremely active — intense exercise or physical job</option>
-					</select>
+						Get started
+						<ArrowRight class="ml-2 size-4" />
+					</Button>
+					<Button href="/login" variant="outline" size="lg" class="login-button">
+						Login
+					</Button>
 				</div>
-			</section>
+			</div>
+		</section>
 
-			<Separator />
-
-			<section class="space-y-4">
-				<div class="space-y-2">
-					<Label for="dislikes">Foods you dislike</Label>
-					<textarea
-						id="dislikes"
-						bind:value={dislikes}
-						placeholder="e.g. mushrooms, olives, cilantro"
-						rows={3}
-						class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-					></textarea>
-				</div>
-				<DietaryRestrictionsPicker bind:value={dietaryRestrictions} />
-			</section>
-
-			<Separator />
-
-			<DietaryGoalPicker bind:dietGoal={goal} />
-
-			{#if errorMessage}
-				<p class="text-sm text-destructive" role="alert">{errorMessage}</p>
-			{/if}
-
-			<Button type="submit" class="w-full">
-				Continue to sign in <ArrowRight class="ml-2 size-4" />
-			</Button>
-		</form>
+		<footer class="landing-footer">
+			<span>Prandium AI</span>
+			<span>Made for your kind of day.</span>
+		</footer>
 	</div>
 </main>
+
+<style>
+	.landing-page {
+		position: relative;
+		display: flex;
+		min-height: 100svh;
+		overflow: auto;
+		align-items: center;
+		justify-content: center;
+		background:
+			radial-gradient(ellipse at 50% 18%, color-mix(in oklab, var(--primary) 9%, transparent), transparent 38rem),
+			var(--background);
+	}
+
+	.landing-shell {
+		position: relative;
+		z-index: 1;
+		width: min(100% - 2rem, 900px);
+		margin: 0 auto;
+	}
+
+	.landing-header {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 1.5rem 0;
+		animation: landing-enter 500ms ease-out both;
+	}
+
+	.brand {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.65rem;
+		color: var(--foreground);
+		font-size: 1.1rem;
+		font-weight: 700;
+		letter-spacing: -0.04em;
+		text-decoration: none;
+	}
+
+	.brand-mark {
+		display: grid;
+		width: 2.25rem;
+		height: 2.25rem;
+		place-items: center;
+		border-radius: 0.75rem;
+		background: var(--primary);
+		color: var(--primary-foreground);
+	}
+
+	.brand-accent {
+		color: var(--primary);
+	}
+
+	.hero {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1.75rem;
+		padding: clamp(2rem, 5vh, 3.5rem) 0;
+	}
+
+	.hero-copy {
+		width: 100%;
+		text-align: center;
+		animation: landing-enter 650ms 80ms ease-out both;
+	}
+
+	.eyebrow {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.55rem;
+		color: var(--primary);
+		font-size: 0.75rem;
+		font-weight: 700;
+		letter-spacing: 0.14em;
+		text-align: center;
+	}
+
+	h1 {
+		margin-top: 0.8rem;
+		font-family: var(--font-heading);
+		font-size: clamp(3rem, 8vw, 5.4rem);
+		font-weight: 700;
+		letter-spacing: -0.075em;
+		line-height: 1.02;
+	}
+
+	h1 span {
+		color: var(--primary);
+	}
+
+	.hero-description {
+		margin-top: 0.8rem;
+		color: var(--muted-foreground);
+		font-size: clamp(1rem, 1.6vw, 1.2rem);
+	}
+
+	.hero-actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: center;
+		gap: 1rem;
+	}
+
+	.welcome-actions {
+		animation: landing-enter 650ms 240ms ease-out both;
+	}
+
+	:global(.get-started-button) {
+		min-height: 3rem;
+		padding-inline: 1.25rem;
+		box-shadow: 0 8px 24px color-mix(in oklab, var(--primary) 23%, transparent);
+	}
+
+	.landing-footer {
+		display: flex;
+		justify-content: center;
+		gap: 1rem;
+		border-top: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+		padding: 1.25rem 0;
+		color: var(--muted-foreground);
+		font-size: 0.75rem;
+	}
+
+	.landing-footer span:first-child {
+		color: var(--foreground);
+		font-weight: 650;
+	}
+
+	@keyframes landing-enter {
+		from {
+			opacity: 0;
+			transform: translateY(12px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	@media (max-width: 850px) {
+		.landing-shell {
+			width: min(100% - 2rem, 760px);
+		}
+	}
+
+	@media (max-width: 520px) {
+		.landing-shell {
+			width: min(100% - 2rem, 1160px);
+		}
+
+		.hero {
+			gap: 1.35rem;
+			padding: 2rem 0;
+		}
+
+		h1 {
+			font-size: clamp(3rem, 14vw, 4.2rem);
+		}
+
+		.hero-description {
+			font-size: 0.96rem;
+		}
+
+		.hero-actions {
+			gap: 0.75rem;
+		}
+
+		.landing-footer span:last-child {
+			text-align: center;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.landing-header,
+		.hero-copy,
+		.welcome-actions {
+			animation: none;
+		}
+	}
+</style>

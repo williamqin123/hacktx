@@ -131,3 +131,35 @@
     @apply font-sans;
   }
 }
+
+@layer components {
+  [data-slot="button"] {
+    transition:
+      transform 160ms ease,
+      box-shadow 160ms ease,
+      background-color 160ms ease,
+      color 160ms ease,
+      border-color 160ms ease;
+  }
+
+  [data-slot="button"]:not(:disabled):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px oklch(0.2 0 0 / 12%);
+  }
+
+  [data-slot="button"]:not(:disabled):active {
+    transform: scale(0.97);
+    box-shadow: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
