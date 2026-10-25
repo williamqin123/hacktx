@@ -54,3 +54,28 @@ def set_profile_info():
     except Exception as e:
         logging.error(e)
         return jsonify({"error": "Failed to save profile"}), 500
+    
+@user_bp.route("/get-profile-info", methods=["GET"])
+@login_required
+def get_profile_info():
+    try:
+        user_id = request.current_user["sub"]
+
+        db = firestore.client()
+        user_ref = db.collection("users").document(user_id)
+        user_doc = user_ref.get()
+
+        if not user_doc.exists:
+            return jsonify({"error": "User not found"}), 404
+
+        user_data = user_doc.to_dict()
+        profile = user_data.get("profile")
+
+        if not profile:
+            return jsonify({"error": "Profile not found"}), 404
+
+        return jsonify(profile), 200
+
+    except Exception as e:
+        logging.error(e)
+        return jsonify({"error": "Failed to load profile"}), 500

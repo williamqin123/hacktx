@@ -18,6 +18,7 @@
 
 	import { apiFetch } from "#utils/api.js";
 
+	let isLoading = $state(true);
 	let isSaving = $state(false);
 	let errorMessage = $state('');
 	let successMessage = $state('');
@@ -67,10 +68,18 @@
 	import { onMount } from 'svelte';
 
 	async function loadProfile() {
+		isLoading = true;
+		errorMessage = '';
+
 		try {
 			const response = await apiFetch(
 				'http://localhost:5001/get-profile-info'
 			);
+
+			if (response.status === 404) {
+				// No profile exists yet; keep the default field values.
+				return;
+			}
 
 			if (!response.ok) {
 				throw new Error('Failed to load profile.');
@@ -90,6 +99,8 @@
 				error instanceof Error
 					? error.message
 					: 'Failed to load profile.';
+		} finally {
+			isLoading = false;
 		}
 	}
 
@@ -114,6 +125,20 @@
 		</p>
 	</header>
 
+	{#if isLoading}
+	<div
+		class="flex min-h-64 items-center justify-center"
+		role="status"
+		aria-live="polite"
+	>
+		<div class="flex items-center gap-3 text-sm text-muted-foreground">
+			<span
+				class="h-5 w-5 animate-spin rounded-full border-2 border-muted border-t-primary"
+			></span>
+			Loading profile...
+		</div>
+	</div>
+	{:else}
 	<form
 		onsubmit={(event) => {
 			event.preventDefault();
@@ -222,4 +247,5 @@
 			</div>
 		</div>
 	</form>
+	{/if}
 </div>
