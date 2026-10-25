@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "tw-animate-css/dist/tw-animate.css"; /* ← change this line */
+/* @import "tw-animate-css/dist/tw-animate.css"; */
 @import "shadcn-svelte/tailwind.css";
 /* ... rest stays the same */
 @import "@fontsource-variable/sora";
