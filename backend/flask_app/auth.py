@@ -10,6 +10,7 @@ from flask import (
     redirect,
     request,
     url_for,
+    jsonify,
 )
 from authlib.integrations.flask_client import OAuth
 from authlib.jose import jwt, JsonWebKey
@@ -88,13 +89,14 @@ def login_required(f):
         token = request.cookies.get("auth_token")
 
         if not token:
-            return redirect(url_for("auth.login"))
+            return jsonify({"error": "Unauthorized"}), 401
 
         try:
             request.current_user = verify_token(token)
         except Exception:
             response = make_response(
-                redirect(url_for("auth.login"))
+                jsonify({"error": "Invalid or expired token"}),
+                401,
             )
             response.delete_cookie("auth_token", path="/")
             return response
@@ -128,23 +130,11 @@ def callback():
     )
     return response
 
-
-@auth_bp.route("/me")
-@login_required
-def me():
-    user = request.current_user
-    return {
-        "sub": user.get("sub"),
-        "name": user.get("name"),
-        "email": user.get("email"),
-    }
-
-
 @auth_bp.route("/logout")
 def logout():
     domain = os.environ["AUTH0_DOMAIN"]
     client_id = os.environ["AUTH0_CLIENT_ID"]
-    return_to = url_for("home", _external=True)
+    return_to = url_for("main.home", _external=True)
 
     logout_url = (
         f"https://{domain}/v2/logout?"
