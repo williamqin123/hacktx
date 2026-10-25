@@ -13,11 +13,16 @@
     import { Label } from "#lib/components/ui/label";
      // @ts-ignore
     import { Textarea } from "#lib/components/ui/textarea";
-
-    import DietaryRestrictionsPicker from '#components/DietaryRestrictionsPicker.svelte';
+    import * as Collapsible from "#lib/components/ui/collapsible";
+    import { Separator } from "#lib/components/ui/separator";
+    import { ChevronDown } from "@lucide/svelte";
 
     let description = $state("");
+
 	let dietaryRestrictions = $state<string[]>([]);
+	let dietGoal = $state('maintain');
+	import DietaryRestrictionsPicker from '#components/DietaryRestrictionsPicker.svelte';
+	import DietaryGoalPicker from '#components/DietaryGoalPicker.svelte';
 
     let isSubmitting = $state(false);
     let errorMessage = $state("");
@@ -41,7 +46,8 @@
                 },
                 body: JSON.stringify({
                     description: description.trim(),
-                    dietaryRestrictions: dietaryRestrictions
+                    dietaryRestrictions: dietaryRestrictions,
+                    dietGoal: dietGoal
                 })
             });
 
@@ -102,9 +108,22 @@
 
                 <div class="border-t"></div>
 
-                <section class="space-y-4">
-                    <DietaryRestrictionsPicker bind:value={dietaryRestrictions} />
-                </section>
+                <Collapsible.Root class="space-y-4">
+                    <Collapsible.Trigger
+                        class="flex w-full items-center justify-between rounded-md py-2 text-sm font-medium hover:underline"
+                    >
+                        Override Your Default Dietary Preferences
+                        <ChevronDown class="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                    </Collapsible.Trigger>
+
+                    <Collapsible.Content class="space-y-4">
+                        <section class="space-y-4">
+                            <DietaryRestrictionsPicker bind:value={dietaryRestrictions} />
+                            <Separator />
+                            <DietaryGoalPicker bind:dietGoal={dietGoal} />
+                        </section>
+                    </Collapsible.Content>
+                </Collapsible.Root>
 
                 {#if errorMessage}
                     <p class="text-sm text-destructive" role="alert">
