@@ -25,6 +25,7 @@ export default defineConfig({
       "#components": fileURLToPath(
         new URL("./src/components", import.meta.url),
       ),
+      "#utils": fileURLToPath(new URL("./src/utils", import.meta.url)),
     },
   },
 });

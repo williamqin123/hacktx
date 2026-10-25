@@ -1,7 +1,7 @@
 import os
 from functools import wraps
 from urllib.parse import urlencode
-
+import logging
 import requests
 from flask import (
     Blueprint,
@@ -51,22 +51,39 @@ def get_jwks():
 
 
 def verify_token(token):
-    """Verify the JWT signature and essential claims."""
+    """Verify the Auth0 ID token signature and essential claims."""
     domain = os.environ["AUTH0_DOMAIN"]
     issuer = f"https://{domain}/"
     audience = os.environ["AUTH0_CLIENT_ID"]
 
-    header = jwt.get_unverified_header(token)
+    # Parse the JWT header without verifying the signature.
+    header_segment = token.split(".")[0]
+
+    import base64
+    import json
+
+    padded = header_segment + "=" * (-len(header_segment) % 4)
+    header = json.loads(
+        base64.urlsafe_b64decode(padded).decode("utf-8")
+    )
 
     if header.get("alg") != "RS256":
         raise ValueError("Unexpected JWT algorithm")
 
     key_data = next(
-        key for key in get_jwks()
-        if key["kid"] == header.get("kid")
+        (
+            key for key in get_jwks()
+            if key["kid"] == header.get("kid")
+        ),
+        None,
     )
+
+    if key_data is None:
+        raise ValueError("Signing key not found")
+
     key = JsonWebKey.import_key(key_data)
 
+    # Verify the signature using the trusted public key.
     claims = jwt.decode(token, key)
     claims.validate()
 
@@ -94,6 +111,7 @@ def login_required(f):
         try:
             request.current_user = verify_token(token)
         except Exception:
+            logging.error("Token verification failed", exc_info=True)
             response = make_response(
                 jsonify({"error": "Invalid or expired token"}),
                 401,
@@ -119,7 +137,7 @@ def callback():
     id_token = token["id_token"]
 
     # Store the ID token in an HTTP-only cookie.
-    response = make_response(redirect("/"))
+    response = make_response(redirect("http://localhost:5173/logged-in-app/studio"))
     response.set_cookie(
         "auth_token",
         id_token,

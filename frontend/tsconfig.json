@@ -3,7 +3,9 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "#components/*": ["./src/components/*"]
+      "#components/*": ["./src/components/*"],
+      "#utils/*": ["./src/utils/*"],
+      "#lib/*": ["./src/lib/*"]
     }
   },
   "include": ["src", "vite.config.ts", "svelte.config.js", "svelte.config.js"]
