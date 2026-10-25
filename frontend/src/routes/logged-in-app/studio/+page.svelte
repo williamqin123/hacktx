@@ -17,6 +17,8 @@
     import { Separator } from "#lib/components/ui/separator";
     import { ChevronDown } from "@lucide/svelte";
 
+    import { apiFetch } from "#utils/api.js";
+
     let description = $state("");
 
 	let dietaryRestrictions = $state<string[]>([]);
@@ -39,7 +41,7 @@
         isSubmitting = true;
 
         try {
-            const response = await fetch("http://localhost:5001/api/meal-plan", {
+            const response = await apiFetch("http://localhost:5001/api/meal-plan", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
