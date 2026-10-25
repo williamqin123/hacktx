@@ -15,20 +15,16 @@ def create_meal_plan():
     if not isinstance(data, dict):
         return jsonify({"error": "Request body must be a JSON object"}), 400
 
+    from .main import validate_user_info_json
+    try:
+        validate_user_info_json(data)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
     required_fields = {
-        "people",
-        # "budget",
         "diet",
         "days",
-        "dislikes",
-        # "name",
-        "age",
-        "sex",
-        "height",
-        "weight",
-        "goal",
-        "activityLevel",
-        "dietaryRestrictions",
+        "people",
     }
     missing_fields = sorted(required_fields - data.keys())
     if missing_fields:
@@ -52,86 +48,11 @@ def create_meal_plan():
     dietary_restrictions = data["dietaryRestrictions"]
 
     if isinstance(people, bool) or not isinstance(people, int) or people < 1:
-        return jsonify({"error": "'people' must be a positive integer"}), 400
-    '''
-    if (
-        isinstance(budget, bool)
-        or not isinstance(budget, (int, float))
-        or not math.isfinite(budget)
-        or budget < 0
-    ):
-        return jsonify({"error": "'budget' must be a non-negative number"}), 400
-    '''
-    if not isinstance(diet, str) or not diet.strip():
-        return jsonify({"error": "'diet' must be a non-empty string"}), 400
+        raise ValueError("'people' must be a positive integer")
+
     if isinstance(days, bool) or not isinstance(days, int) or days < 1:
-        return jsonify({"error": "'days' must be a positive integer"}), 400
-    if not isinstance(dislikes, str):
-        return jsonify({"error": "'dislikes' must be a string"}), 400
-    '''
-    if not isinstance(name, str) or not name.strip():
-        return jsonify({"error": "'name' must be a non-empty string"}), 400
-    '''
-    if isinstance(age, bool) or not isinstance(age, int) or not 1 <= age <= 120:
-        return jsonify({"error": "'age' must be an integer from 1 to 120"}), 400
-    allowed_sexes = {
-        "female",
-        "male",
-        "intersex",
-        "other",
-        "prefer_not_to_say",
-    }
-    if not isinstance(sex, str) or sex not in allowed_sexes:
-        return jsonify({"error": "'sex' must be a supported selection"}), 400
-    if (
-        isinstance(height, bool)
-        or not isinstance(height, (int, float))
-        or not math.isfinite(height)
-        or not 1 <= height <= 300
-    ):
-        return jsonify({"error": "'height' must be between 1 and 300 cm"}), 400
-    if (
-        isinstance(weight, bool)
-        or not isinstance(weight, (int, float))
-        or not math.isfinite(weight)
-        or not 1 <= weight <= 700
-    ):
-        return jsonify({"error": "'weight' must be between 1 and 700 kg"}), 400
-    if not isinstance(goal, str) or goal not in {"lose", "maintain", "gain"}:
-        return jsonify({"error": "'goal' must be lose, maintain, or gain"}), 400
-    allowed_activity_levels = {
-        "sedentary",
-        "lightly_active",
-        "moderately_active",
-        "very_active",
-        "extra_active",
-    }
-    if (
-        not isinstance(activity_level, str)
-        or activity_level not in allowed_activity_levels
-    ):
-        return jsonify({"error": "'activity_level' must be a supported selection"}), 400
-    allowed_restrictions = {
-        "Vegetarian",
-        "Vegan",
-        "Gluten-free",
-        "Dairy-free",
-        "Nut-free",
-        "Pescatarian",
-        "Halal",
-        "Kosher",
-    }
-    if (
-        not isinstance(dietary_restrictions, list)
-        or not all(
-            isinstance(restriction, str)
-            and restriction in allowed_restrictions
-            for restriction in dietary_restrictions
-        )
-    ):
-        return jsonify({
-            "error": "'dietary_restrictions' must be a list of supported restrictions"
-        }), 400
+        raise ValueError("'days' must be a positive integer")
+
 
     from SerpAPI import generate_meal_plan
 

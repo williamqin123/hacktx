@@ -22,6 +22,12 @@ def set_profile_info():
 
         if not data:
             return jsonify({"error": "Missing profile data"}), 400
+        
+        from .main import validate_user_info_json
+        try:
+            validate_user_info_json(data)
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 400
 
         user_id = request.current_user["sub"]
 
