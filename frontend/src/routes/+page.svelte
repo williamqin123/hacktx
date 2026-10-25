@@ -45,7 +45,7 @@
       </p>
 
       <div class="flex flex-col gap-3 sm:flex-row">
-        <Button size="lg" href="/auth/login" class="h-12 px-6">
+        <Button size="lg" href="/login" class="h-12 px-6">
           Get started <ArrowRight class="ml-2 size-4" />
         </Button>
       </div>
