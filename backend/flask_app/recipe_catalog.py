@@ -81,6 +81,29 @@ def _extract_recipes(data):
     return recipes
 
 
+def store_recipes(data, user_id):
+    recipes = _extract_recipes(data)
+    db = firestore.client()
+    collection = db.collection("users").document(user_id).collection("recipes")
+    stored_recipes = []
+
+    for start in range(0, len(recipes), 500):
+        batch = db.batch()
+        batch_recipes = recipes[start:start + 500]
+        batch_documents = []
+        for recipe in batch_recipes:
+            document = collection.document()
+            batch.set(document, {
+                **recipe,
+                "createdAt": firestore.SERVER_TIMESTAMP,
+            })
+            batch_documents.append({"id": document.id, **recipe})
+        batch.commit()
+        stored_recipes.extend(batch_documents)
+
+    return stored_recipes
+
+
 @recipe_bp.route("/api/recipes", methods=["GET"])
 @login_required
 def get_recipes():
@@ -111,32 +134,11 @@ def save_recipes():
         return jsonify({"error": "Request body must be a JSON object"}), 400
 
     try:
-        recipes = _extract_recipes(data)
+        user_id = request.current_user["sub"]
+        stored_recipes = store_recipes(data, user_id)
+        return jsonify({"recipes": stored_recipes}), 201
     except ValueError as error:
         return jsonify({"error": str(error)}), 400
-
-    try:
-        user_id = request.current_user["sub"]
-        db = firestore.client()
-        collection = (
-            db.collection("users").document(user_id).collection("recipes")
-        )
-        stored_recipes = []
-        for start in range(0, len(recipes), 500):
-            batch = db.batch()
-            batch_recipes = recipes[start:start + 500]
-            batch_documents = []
-            for recipe in batch_recipes:
-                document = collection.document()
-                batch.set(document, {
-                    **recipe,
-                    "createdAt": firestore.SERVER_TIMESTAMP,
-                })
-                batch_documents.append({"id": document.id, **recipe})
-            batch.commit()
-            stored_recipes.extend(batch_documents)
-
-        return jsonify({"recipes": stored_recipes}), 201
     except Exception:
         logging.exception("Failed to save recipes")
         return jsonify({"error": "Failed to save recipes"}), 500
