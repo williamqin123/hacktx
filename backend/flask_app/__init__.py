@@ -20,5 +20,8 @@ def create_app():
 
     from flask_app.main import main_bp
     app.register_blueprint(main_bp)
+
+    from flask_app.WalmartEP import walmart_bp
+    app.register_blueprint(walmart_bp)
     
     return app
