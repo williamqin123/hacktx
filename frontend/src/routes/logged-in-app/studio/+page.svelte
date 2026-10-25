@@ -87,12 +87,49 @@
                 }
             );
 
+            const responseData = await response.json();
             if (!response.ok) {
-                throw new Error("Failed to generate recipe.");
+                throw new Error(
+                    responseData.details ??
+                        responseData.error ??
+                        "Failed to generate meal plan."
+                );
             }
 
-            const mealPlanUrl = await response.text();
-            window.location.assign(mealPlanUrl);
+            if (!Array.isArray(responseData.grocery_list)) {
+                throw new Error("Meal plan did not include a grocery list.");
+            }
+
+            const shoppingResponse = await apiFetch(
+                "http://localhost:5001/api/walmart-search",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ items: responseData.grocery_list })
+                }
+            );
+            const walmartResults = await shoppingResponse.json();
+            if (!shoppingResponse.ok) {
+                throw new Error(
+                    walmartResults.details ??
+                        walmartResults.error ??
+                        "Failed to look up grocery products."
+                );
+            }
+
+            const slug = crypto.randomUUID();
+            sessionStorage.setItem(
+                `meal-plan-shopping:${slug}`,
+                JSON.stringify({
+                    mealPlan: responseData,
+                    walmartResults
+                })
+            );
+            window.location.assign(
+                `/logged-in-app/meal-plans-shopping/${slug}`
+            );
         } catch (error) {
             errorMessage =
                 error instanceof Error
