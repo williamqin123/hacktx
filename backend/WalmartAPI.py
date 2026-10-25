@@ -1,13 +1,11 @@
 import json
 import os
-from pathlib import Path
 
 import serpapi
 from dotenv import load_dotenv
 
 load_dotenv()
 
-RESULTS_FILE = Path(__file__).resolve().with_name("walmart_search_results.json")
 STORE_ID = 3569
 
 
@@ -167,8 +165,4 @@ def search_walmart_items(meal_plan_response):
         "grocery_list": meal_plan_response.get("grocery_list"),
         "walmart_results": results_by_item,
     }
-    with RESULTS_FILE.open("w", encoding="utf-8") as output_file:
-        json.dump(combined_results, output_file, indent=2, ensure_ascii=False)
-        output_file.write("\n")
-
     return combined_results

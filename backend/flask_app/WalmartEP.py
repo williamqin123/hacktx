@@ -153,7 +153,7 @@ def create_meal_plan():
             "details": str(error),
         }), 502
 
-    from WalmartAPI import RESULTS_FILE, search_walmart_items
+    from WalmartAPI import search_walmart_items
 
     try:
         walmart_results = search_walmart_items(meal_plan)
@@ -166,5 +166,4 @@ def create_meal_plan():
     return jsonify({
         **meal_plan,
         "walmart_results": walmart_results["walmart_results"],
-        "results_file": RESULTS_FILE.name,
     }), 200
