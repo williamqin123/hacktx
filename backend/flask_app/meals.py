@@ -94,6 +94,8 @@ def create_meal_plan():
 
     return jsonify({**meal_plan, "recipes": saved_recipes}), 200
 
+
+
 from WalmartAPI import search_walmart_items
 
 @walmart_bp.route("/api/walmart-search", methods=["POST"])
