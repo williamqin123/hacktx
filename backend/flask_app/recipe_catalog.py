@@ -3,8 +3,6 @@ import logging
 from firebase_admin import firestore
 from flask import Blueprint, jsonify, request
 
-from .auth import login_required
-
 
 recipe_bp = Blueprint("recipes", __name__)
 MEAL_TYPES = {"breakfast", "lunch", "dinner"}
@@ -81,10 +79,10 @@ def _extract_recipes(data):
     return recipes
 
 
-def store_recipes(data, user_id):
+def store_recipes(data):
     recipes = _extract_recipes(data)
     db = firestore.client()
-    collection = db.collection("users").document(user_id).collection("recipes")
+    collection = db.collection("recipes")
     stored_recipes = []
 
     for start in range(0, len(recipes), 500):
@@ -105,14 +103,10 @@ def store_recipes(data, user_id):
 
 
 @recipe_bp.route("/api/recipes", methods=["GET"])
-@login_required
 def get_recipes():
     try:
-        user_id = request.current_user["sub"]
         db = firestore.client()
-        snapshots = db.collection("users").document(user_id).collection(
-            "recipes"
-        ).stream()
+        snapshots = db.collection("recipes").stream()
         recipes = [
             {"id": snapshot.id, **snapshot.to_dict()}
             for snapshot in snapshots
@@ -124,7 +118,6 @@ def get_recipes():
 
 
 @recipe_bp.route("/api/recipes", methods=["POST"])
-@login_required
 def save_recipes():
     if not request.is_json:
         return jsonify({"error": "Request body must be JSON"}), 400
@@ -134,8 +127,7 @@ def save_recipes():
         return jsonify({"error": "Request body must be a JSON object"}), 400
 
     try:
-        user_id = request.current_user["sub"]
-        stored_recipes = store_recipes(data, user_id)
+        stored_recipes = store_recipes(data)
         return jsonify({"recipes": stored_recipes}), 201
     except ValueError as error:
         return jsonify({"error": str(error)}), 400
