@@ -527,7 +527,7 @@
 						<summary class="flex cursor-pointer list-inside flex-wrap items-center justify-between gap-2 px-5 py-4">
 							<div>
 								<span class="font-semibold">{groceryItem.item}</span>
-								{#each getMealsForItem(groceryItem) as mealName (mealName)}
+								{#each getMealsForItem(groceryItem) as mealName, mealIndex (`${mealName}-${mealIndex}`)}
 									<span class="ml-2 inline-flex rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
 										{mealName}
 									</span>
@@ -540,7 +540,7 @@
 						<div class="border-t p-4">
 							{#if products.length > 0}
 								<div class="flex flex-col">
-									{#each products as product (`${product.id}`)}
+									{#each products as product, productIndex (`${product.id}-${productIndex}`)}
 										{@const price = product.price}
 										<article class="flex flex-wrap items-center justify-between gap-4 border-b py-4 last:border-b-0">
 											<div class="min-w-0 flex-1">
