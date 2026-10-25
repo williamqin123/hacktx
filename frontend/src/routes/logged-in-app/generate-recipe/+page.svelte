@@ -1,5 +1,6 @@
 
 <script lang="ts">
+
     // @ts-ignore
     import { Button } from "#lib/components/ui/button";
     import {
@@ -16,9 +17,12 @@
     import { Textarea } from "#lib/components/ui/textarea";
 
     let dishInstructions = $state("");
-    let dietaryRestrictions = $state("");
     let isSubmitting = $state(false);
     let errorMessage = $state("");
+
+    import DietaryRestrictionsPicker from '#components/DietaryRestrictionsPicker.svelte';
+
+	let restrictions = $state<string[]>([]);
 
     async function submit(event: SubmitEvent) {
         event.preventDefault();
@@ -110,26 +114,7 @@
                 <div class="border-t"></div>
 
                 <section class="space-y-4">
-                    <div class="space-y-1">
-                        <h2 class="text-lg font-semibold">
-                            Dietary Restrictions
-                        </h2>
-                        <p class="text-sm text-muted-foreground">
-                            Let us know about allergies or dietary preferences.
-                        </p>
-                    </div>
-
-                    <div class="space-y-2">
-                        <Label for="dietary-restrictions">
-                            Restrictions (Optional)
-                        </Label>
-                        <Textarea
-                            id="dietary-restrictions"
-                            bind:value={dietaryRestrictions}
-                            placeholder="e.g. No peanuts, gluten-free, vegetarian..."
-                            rows={3}
-                        />
-                    </div>
+                    <DietaryRestrictionsPicker bind:value={restrictions} />
                 </section>
 
                 {#if errorMessage}

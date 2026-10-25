@@ -16,26 +16,7 @@
 	let restrictions = $state<string[]>([]);
 	let goal = $state('maintain');
 
-	const dietaryOptions = [
-		'Vegetarian',
-		'Vegan',
-		'Gluten-free',
-		'Dairy-free',
-		'Nut-free',
-		'Pescatarian',
-		'Halal',
-		'Kosher'
-	];
-
-	function toggleRestriction(option: string, checked: boolean) {
-		if (checked) {
-			if (!restrictions.includes(option)) {
-				restrictions = [...restrictions, option];
-			}
-		} else {
-			restrictions = restrictions.filter((r) => r !== option);
-		}
-	}
+	import DietaryRestrictionsPicker from '#components/DietaryRestrictionsPicker.svelte';
 
 	function saveProfile() {
 		const profile = {
@@ -148,29 +129,7 @@
 		<Separator />
 
 		<section class="space-y-4">
-			<div class="space-y-1">
-				<h2 class="text-lg font-medium">Dietary Restrictions</h2>
-				<p class="text-sm text-muted-foreground">
-					Select all that apply.
-				</p>
-			</div>
-
-			<div class="grid grid-cols-2 gap-4 sm:grid-cols-3">
-				{#each dietaryOptions as option}
-					<label
-						class="flex cursor-pointer items-center gap-2 text-sm"
-						for={`diet-${option}`}
-					>
-						<Checkbox
-							id={`diet-${option}`}
-							checked={restrictions.includes(option)}
-							onCheckedChange={(checked) =>
-								toggleRestriction(option, checked === true)}
-						/>
-						<span>{option}</span>
-					</label>
-				{/each}
-			</div>
+			<DietaryRestrictionsPicker bind:value={restrictions} />
 		</section>
 
 		<Separator />
