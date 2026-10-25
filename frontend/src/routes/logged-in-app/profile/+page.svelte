@@ -16,20 +16,86 @@
 	import DietaryRestrictionsPicker from '#components/DietaryRestrictionsPicker.svelte';
 	import DietaryGoalPicker from '#components/DietaryGoalPicker.svelte';
 
-	function saveProfile() {
-		const profile = {
-			name,
-			age,
-			sex,
-			height,
-			weight,
-			dietaryRestrictions: dietaryRestrictions,
-			goal: dietGoal
-		};
+	import { apiFetch } from "#utils/api.js";
 
-		// Replace with your API request.
-		console.log('Saving profile:', profile);
+	let isSaving = $state(false);
+	let errorMessage = $state('');
+	let successMessage = $state('');
+
+	async function saveProfile() {
+		isSaving = true;
+		errorMessage = '';
+		successMessage = '';
+
+		try {
+			const profile = {
+				name: name.trim(),
+				age,
+				sex,
+				height,
+				weight,
+				dietaryRestrictions,
+				goal: dietGoal
+			};
+
+			const response = await apiFetch(
+				'http://localhost:5001/set-profile-info',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(profile)
+				}
+			);
+
+			if (!response.ok) {
+				throw new Error('Failed to save profile.');
+			}
+
+			successMessage = 'Profile saved successfully.';
+		} catch (error) {
+			errorMessage =
+				error instanceof Error
+					? error.message
+					: 'Something went wrong.';
+		} finally {
+			isSaving = false;
+		}
 	}
+
+	import { onMount } from 'svelte';
+
+	async function loadProfile() {
+		try {
+			const response = await apiFetch(
+				'http://localhost:5001/get-profile-info'
+			);
+
+			if (!response.ok) {
+				throw new Error('Failed to load profile.');
+			}
+
+			const profile = await response.json();
+
+			name = profile.name ?? '';
+			age = profile.age ?? undefined;
+			sex = profile.sex ?? '';
+			height = profile.height ?? undefined;
+			weight = profile.weight ?? undefined;
+			dietaryRestrictions = profile.dietaryRestrictions ?? [];
+			dietGoal = profile.goal ?? 'maintain';
+		} catch (error) {
+			errorMessage =
+				error instanceof Error
+					? error.message
+					: 'Failed to load profile.';
+		}
+	}
+
+	onMount(() => {
+		loadProfile();
+	});
 </script>
 
 <svelte:head>
@@ -133,13 +199,27 @@
 		<Separator />
 
 		<section class="space-y-4">
-			<DietaryGoalPicker bind:value={dietGoal} />
+			<DietaryGoalPicker bind:dietGoal={dietGoal} />
 		</section>
 
-		<div class="flex justify-end">
-			<Button type="submit" class="w-full sm:w-auto">
-				Save Profile
-			</Button>
+		<div class="space-y-2">
+			{#if errorMessage}
+				<p class="text-sm text-destructive">{errorMessage}</p>
+			{/if}
+
+			{#if successMessage}
+				<p class="text-sm text-green-600">{successMessage}</p>
+			{/if}
+
+			<div class="flex justify-end">
+				<Button
+					type="submit"
+					class="w-full sm:w-auto"
+					disabled={isSaving}
+				>
+					{isSaving ? 'Saving...' : 'Save Profile'}
+				</Button>
+			</div>
 		</div>
 	</form>
 </div>

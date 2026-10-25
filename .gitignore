@@ -196,3 +196,5 @@ htmlcov/
 # OS generated files
 .DS_Store
 Thumbs.db
+
+serviceAccountKey.json

@@ -22,7 +22,7 @@
       <span class="text-lg">Recipe Studio</span>
     </a>
 
-    <Button variant="outline" href="/auth/login">
+    <Button variant="outline" href="/login">
       Sign in <ArrowRight class="ml-2 size-4" />
     </Button>
   </header>

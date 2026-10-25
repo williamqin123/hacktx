@@ -1,5 +1,3 @@
-import { goto } from "$app/navigation";
-
 export async function apiFetch(
   input: RequestInfo | URL,
   init?: RequestInit,
@@ -10,7 +8,7 @@ export async function apiFetch(
   });
 
   if (response.status === 401) {
-    await goto("http://localhost:5001/logout");
+    window.location.assign("http://localhost:5001/logout");
     throw new Error("Unauthorized");
   }
 
