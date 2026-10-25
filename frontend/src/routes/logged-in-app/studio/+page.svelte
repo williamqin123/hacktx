@@ -1,6 +1,4 @@
-
 <script lang="ts">
-
     // @ts-ignore
     import { Button } from "#lib/components/ui/button";
     import {
@@ -16,18 +14,18 @@
      // @ts-ignore
     import { Textarea } from "#lib/components/ui/textarea";
 
-    let dishInstructions = $state("");
-    let isSubmitting = $state(false);
-    let errorMessage = $state("");
-
     import DietaryRestrictionsPicker from '#components/DietaryRestrictionsPicker.svelte';
 
-	let restrictions = $state<string[]>([]);
+    let description = $state("");
+	let dietaryRestrictions = $state<string[]>([]);
+
+    let isSubmitting = $state(false);
+    let errorMessage = $state("");
 
     async function submit(event: SubmitEvent) {
         event.preventDefault();
 
-        if (!dishInstructions.trim()) {
+        if (!description.trim()) {
             errorMessage = "Please describe the dish or provide ingredients.";
             return;
         }
@@ -42,8 +40,8 @@
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    instructions: dishInstructions.trim(),
-                    dietaryRestrictions: restrictions
+                    description: description.trim(),
+                    dietaryRestrictions: dietaryRestrictions
                 })
             });
 
@@ -51,10 +49,9 @@
                 throw new Error("Failed to generate recipe.");
             }
 
-            const recipe = await response.json();
+            const mealPlanUrl = await response.text();
+            window.location.assign(mealPlanUrl);
 
-            // TODO: Store or display the generated recipe.
-            console.log("Generated recipe:", recipe);
         } catch (error) {
             errorMessage =
                 error instanceof Error
@@ -66,14 +63,6 @@
     }
 </script>
 
-<svelte:head>
-    <title>Ask the Chef</title>
-    <meta
-        name="description"
-        content="Generate a recipe based on your ingredients and dietary preferences."
-    />
-</svelte:head>
-
 <main class="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-10">
     <Card class="w-full max-w-2xl shadow-lg">
         <CardHeader class="space-y-2 text-center">
@@ -81,7 +70,7 @@
                 Ask the Chef
             </CardTitle>
             <CardDescription class="text-sm">
-                Tell us what you want to cook, and we'll help you create a recipe.
+                Tell us what you want to eat, and we'll help you create a meal plan.
             </CardDescription>
         </CardHeader>
 
@@ -90,21 +79,21 @@
                 <section class="space-y-4">
                     <div class="space-y-1">
                         <h2 class="text-lg font-semibold">
-                            What Kind of Dish?
+                            What kind of food?
                         </h2>
                         <p class="text-sm text-muted-foreground">
-                            Describe your dish, ingredients, or cooking instructions.
+                            Describe your dishes, ingredients, or cooking instructions.
                         </p>
                     </div>
 
                     <div class="space-y-2">
                         <Label for="dish-instructions">
-                            Dish and Ingredients
+                            Instructions
                         </Label>
                         <Textarea
                             id="dish-instructions"
-                            bind:value={dishInstructions}
-                            placeholder="e.g. I have chicken, rice, garlic, and tomatoes. Suggest a quick dinner..."
+                            bind:value={description}
+                            placeholder="e.g. Suggest quick dinners..."
                             rows={5}
                             required
                         />
@@ -114,7 +103,7 @@
                 <div class="border-t"></div>
 
                 <section class="space-y-4">
-                    <DietaryRestrictionsPicker bind:value={restrictions} />
+                    <DietaryRestrictionsPicker bind:value={dietaryRestrictions} />
                 </section>
 
                 {#if errorMessage}
@@ -128,7 +117,7 @@
                     class="w-full"
                     disabled={isSubmitting}
                 >
-                    {isSubmitting ? "Generating Recipe..." : "Generate Recipe"}
+                    {isSubmitting ? "Generating..." : "Generate Meal Plan"}
                 </Button>
             </form>
         </CardContent>
