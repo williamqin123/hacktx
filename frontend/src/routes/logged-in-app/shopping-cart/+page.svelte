@@ -48,7 +48,7 @@
 		isLoading = true;
 		errorMessage = '';
 		try {
-			const response = await apiFetch('http://localhost:5001/api/cart');
+			const response = await apiFetch('api/cart');
 			const result = await response.json();
 			if (!response.ok) {
 				throw new Error(result.error ?? 'Could not load your shopping cart.');
@@ -66,7 +66,7 @@
 
 	async function loadKrogerConnection() {
 		try {
-			const response = await apiFetch('http://localhost:5001/api/kroger/connection');
+			const response = await apiFetch('api/kroger/connection');
 			const result = await response.json();
 			if (!response.ok) {
 				throw new Error(result.error ?? 'Could not check your Kroger connection.');
@@ -84,7 +84,7 @@
 		errorMessage = '';
 		actionMessage = '';
 		try {
-			const response = await apiFetch('http://localhost:5001/api/cart', {
+			const response = await apiFetch('api/cart', {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ items: nextItems })
@@ -137,7 +137,7 @@
 
 		isCheckingOut = true;
 		try {
-			const response = await apiFetch('http://localhost:5001/api/kroger/cart', {
+			const response = await apiFetch('api/kroger/cart', {
 				method: 'POST'
 			});
 			const result = await response.json();

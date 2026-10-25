@@ -5,14 +5,14 @@ export async function apiFetch(
   init?: RequestInit,
 ): Promise<Response> {
   const requestUrl = input instanceof Request ? input.url : input.toString();
-  const url = new URL(requestUrl, `${API_BASE_URL}/`);
+  const url = new URL(requestUrl, `${PUBLIC_API_URL}/`);
   const response = await fetch(url, {
     ...init,
     credentials: "include",
   });
 
   if (response.status === 401) {
-    window.location.assign(`${API_BASE_URL}/logout`);
+    window.location.assign(`${PUBLIC_API_URL}/logout`);
     throw new Error("Unauthorized");
   }
 
