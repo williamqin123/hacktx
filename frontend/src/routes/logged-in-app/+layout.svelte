@@ -12,10 +12,10 @@
 
 	const tabs = [
 		{ label: 'Profile', href: '/logged-in-app/profile', icon: User },
-		{ label: 'Recipes', href: '/logged-in-app/my-recipes', icon: BookOpen },
 		{ label: 'Studio', href: '/logged-in-app/generate-recipe', icon: Sparkles },
-		{ label: 'Orders', href: '/logged-in-app/orders/', icon: LayoutDashboard },
-		{ label: 'Settings', href: '/logged-in-app/settings', icon: Settings }
+		{ label: 'Recipes', href: '/logged-in-app/my-recipes', icon: BookOpen },
+		//{ label: 'Orders', href: '/logged-in-app/orders/', icon: LayoutDashboard },
+		//{ label: 'Settings', href: '/logged-in-app/settings', icon: Settings }
 	];
 </script>
 
@@ -76,7 +76,7 @@
 
 	.nav-tabs {
 		display: grid;
-		grid-template-columns: repeat(5, minmax(0, 1fr));
+		grid-template-columns: repeat(3, minmax(0, 1fr));
 		width: 100%;
 		max-width: 600px;
 		margin: 0 auto;
