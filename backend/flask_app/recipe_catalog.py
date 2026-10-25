@@ -3,8 +3,6 @@ import logging
 from firebase_admin import firestore
 from flask import Blueprint, jsonify, request
 
-from .auth import login_required
-
 
 recipe_bp = Blueprint("recipes", __name__)
 MEAL_TYPES = {"breakfast", "lunch", "dinner"}
@@ -81,15 +79,34 @@ def _extract_recipes(data):
     return recipes
 
 
+def store_recipes(data):
+    recipes = _extract_recipes(data)
+    db = firestore.client()
+    collection = db.collection("recipes")
+    stored_recipes = []
+
+    for start in range(0, len(recipes), 500):
+        batch = db.batch()
+        batch_recipes = recipes[start:start + 500]
+        batch_documents = []
+        for recipe in batch_recipes:
+            document = collection.document()
+            batch.set(document, {
+                **recipe,
+                "createdAt": firestore.SERVER_TIMESTAMP,
+            })
+            batch_documents.append({"id": document.id, **recipe})
+        batch.commit()
+        stored_recipes.extend(batch_documents)
+
+    return stored_recipes
+
+
 @recipe_bp.route("/api/recipes", methods=["GET"])
-@login_required
 def get_recipes():
     try:
-        user_id = request.current_user["sub"]
         db = firestore.client()
-        snapshots = db.collection("users").document(user_id).collection(
-            "recipes"
-        ).stream()
+        snapshots = db.collection("recipes").stream()
         recipes = [
             {"id": snapshot.id, **snapshot.to_dict()}
             for snapshot in snapshots
@@ -101,7 +118,6 @@ def get_recipes():
 
 
 @recipe_bp.route("/api/recipes", methods=["POST"])
-@login_required
 def save_recipes():
     if not request.is_json:
         return jsonify({"error": "Request body must be JSON"}), 400
@@ -111,32 +127,10 @@ def save_recipes():
         return jsonify({"error": "Request body must be a JSON object"}), 400
 
     try:
-        recipes = _extract_recipes(data)
+        stored_recipes = store_recipes(data)
+        return jsonify({"recipes": stored_recipes}), 201
     except ValueError as error:
         return jsonify({"error": str(error)}), 400
-
-    try:
-        user_id = request.current_user["sub"]
-        db = firestore.client()
-        collection = (
-            db.collection("users").document(user_id).collection("recipes")
-        )
-        stored_recipes = []
-        for start in range(0, len(recipes), 500):
-            batch = db.batch()
-            batch_recipes = recipes[start:start + 500]
-            batch_documents = []
-            for recipe in batch_recipes:
-                document = collection.document()
-                batch.set(document, {
-                    **recipe,
-                    "createdAt": firestore.SERVER_TIMESTAMP,
-                })
-                batch_documents.append({"id": document.id, **recipe})
-            batch.commit()
-            stored_recipes.extend(batch_documents)
-
-        return jsonify({"recipes": stored_recipes}), 201
     except Exception:
         logging.exception("Failed to save recipes")
         return jsonify({"error": "Failed to save recipes"}), 500

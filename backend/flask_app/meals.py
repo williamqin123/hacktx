@@ -1,3 +1,4 @@
+import logging
 import math
 
 from flask import Blueprint, jsonify, request
@@ -78,9 +79,20 @@ def create_meal_plan():
             "details": str(error),
         }), 502
 
-    
+    from .recipe_catalog import store_recipes
 
-    return jsonify(meal_plan), 200
+    try:
+        saved_recipes = store_recipes(meal_plan)
+    except ValueError as error:
+        return jsonify({
+            "error": "Generated meal plan could not be saved as recipes",
+            "details": str(error),
+        }), 502
+    except Exception:
+        logging.exception("Failed to save generated recipes")
+        return jsonify({"error": "Failed to save generated recipes"}), 500
+
+    return jsonify({**meal_plan, "recipes": saved_recipes}), 200
 
 from WalmartAPI import search_walmart_items
 
