@@ -1,4 +1,4 @@
-import { PUBLIC_API_URL } from "$env/static/public";
+const PUBLIC_API_URL = "https://prandium-ai.vercel.app";
 
 export async function apiFetch(
   input: RequestInfo | URL,

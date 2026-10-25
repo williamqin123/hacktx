@@ -11,10 +11,3 @@ declare global {
 }
 
 export {};
-
-/// <reference types="@sveltejs/kit" />
-
-// If the error persists, you can explicitly define the module right below it:
-declare module "$env/static/public" {
-  export const PUBLIC_API_URL: string;
-}
