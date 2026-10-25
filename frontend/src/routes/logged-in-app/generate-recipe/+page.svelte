@@ -36,14 +36,14 @@
         isSubmitting = true;
 
         try {
-            const response = await fetch("/api/recipes", {
+            const response = await fetch("http://localhost:5001/api/meal-plan", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
                     instructions: dishInstructions.trim(),
-                    dietaryRestrictions: dietaryRestrictions.trim()
+                    dietaryRestrictions: restrictions
                 })
             });
 
