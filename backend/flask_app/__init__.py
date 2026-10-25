@@ -37,7 +37,7 @@ def create_app():
     from flask_app.user import user_bp
     app.register_blueprint(user_bp)
 
-    from flask_app.WalmartEP import walmart_bp
+    from flask_app.meals import walmart_bp
     app.register_blueprint(walmart_bp)
 
     from flask_app.recipe_catalog import recipe_bp

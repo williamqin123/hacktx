@@ -3,14 +3,13 @@ import math
 
 from flask import Blueprint, jsonify, request
 
-from .auth import login_required
 
 
 walmart_bp = Blueprint("walmart", __name__)
 
 
 @walmart_bp.route("/api/meal-plan", methods=["POST"])
-@login_required
+
 def create_meal_plan():
     if not request.is_json:
         return jsonify({"error": "Request body must be JSON"}), 400

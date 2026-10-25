@@ -272,11 +272,11 @@ def _validate_meal_plan(result, requested_days):
 
 def generate_meal_plan(
     people,
-    budget,
+    #budget,
     diet,
     days,
     dislikes,
-    name,
+    #name,
     age,
     sex,
     height,
@@ -294,14 +294,12 @@ def generate_meal_plan(
 {AGENT_INSTRUCTIONS}
 
 USER REQUEST:
-People: {people}
-Budget: ${budget}
-Diet: {diet}
-Days: {days}
+Number of People to Feed: {people}
+Meal Plan Diet Description: {diet}
+Number of Days: {days}
 Dislikes: {dislikes}
 
 CUSTOMER PROFILE:
-Name: {name}
 Age: {age}
 Sex: {sex}
 Height: {height} cm
